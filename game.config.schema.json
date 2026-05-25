@@ -1,0 +1,169 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GameConfig",
+  "description": "Konfiguracija igre za automatsku integraciju u Game Hub",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description",
+    "shortDescription",
+    "icon",
+    "accentColor",
+    "minPlayers",
+    "maxPlayers",
+    "avgDuration",
+    "tags",
+    "gameType",
+    "files"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Jedinstveni kebab-case identifikator igre. Koristi se za foldere, rute i registry."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Ime igre prikazano u Game Hub-u."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semver verzija igre."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Pun opis igre (1-2 rečenice)."
+    },
+    "shortDescription": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Kratak opis za karticu u hub-u."
+    },
+    "icon": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Emoji ikona igre."
+    },
+    "accentColor": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "description": "Hex boja akcenta igre."
+    },
+    "minPlayers": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Minimalni broj igrača."
+    },
+    "maxPlayers": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maksimalni broj igrača."
+    },
+    "avgDuration": {
+      "type": "string",
+      "description": "Prosečno trajanje igre (npr. '10-20 min')."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Tagovi za filtriranje i pretragu."
+    },
+    "gameType": {
+      "type": "object",
+      "required": ["id", "statuses"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*$",
+          "description": "Mora biti isto kao top-level 'id'."
+        },
+        "statuses": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Lista svih mogućih statusa sobe (mora sadržati 'lobby' i 'finished').",
+          "contains": { "const": "lobby" }
+        }
+      }
+    },
+    "files": {
+      "type": "object",
+      "required": ["types", "firestore", "components", "pages"],
+      "additionalProperties": false,
+      "properties": {
+        "types": {
+          "type": "string",
+          "description": "Putanja do fajla sa tipovima igre."
+        },
+        "firestore": {
+          "type": "string",
+          "description": "Putanja do fajla sa Firestore operacijama."
+        },
+        "utils": {
+          "type": "string",
+          "description": "Putanja do utility fajla (opciono)."
+        },
+        "prompts": {
+          "type": "string",
+          "description": "Putanja do foldera sa prompt podacima (opciono)."
+        },
+        "components": {
+          "type": "string",
+          "description": "Putanja do foldera sa screen komponentama."
+        },
+        "pages": {
+          "type": "object",
+          "required": ["home", "room"],
+          "additionalProperties": false,
+          "properties": {
+            "home": {
+              "type": "string",
+              "description": "Putanja do home stranice igre."
+            },
+            "room": {
+              "type": "string",
+              "description": "Putanja do room stranice sa [code] parametrom."
+            }
+          }
+        }
+      }
+    },
+    "sharedDependencies": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "UI komponente koje već postoje u Hub-u."
+        },
+        "hooks": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Hook fajlovi koji su shared."
+        },
+        "lib": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Lib fajlovi koji su shared (firebase, utils)."
+        }
+      }
+    },
+    "npmDependencies": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Dodatni npm paketi koje igra zahteva (name: version)."
+    }
+  }
+}
