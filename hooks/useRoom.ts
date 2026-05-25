@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ImpostorRoom } from '@/lib/types/impostor';
-import { subscribeToImpostorRoom } from '@/lib/firestore/impostor';
+import { BaseRoom } from '@/lib/types/core';
+import { subscribeToRoom } from '@/lib/firestore/core';
 
-export function useRoom(code: string) {
-  const [room, setRoom] = useState<ImpostorRoom | null>(null);
+export function useRoom<T extends BaseRoom = BaseRoom>(code: string) {
+  const [room, setRoom] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +13,7 @@ export function useRoom(code: string) {
     setLoading(true);
     setError(null);
 
-    const unsubscribe = subscribeToImpostorRoom(
+    const unsubscribe = subscribeToRoom<T>(
       code,
       (data) => {
         setRoom(data);
