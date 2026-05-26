@@ -177,92 +177,84 @@ function validateConfig(config: Record<string, unknown>): config is GameConfig {
   return true;
 }
 
+// ─── Type Name Renames ───────────────────────────────────────────────
+
+interface TypeRenameMap {
+  from: string;
+  to: string;
+}
+
+function detectTypeRenames(typesContent: string, prefix: string): TypeRenameMap[] {
+  const renames: TypeRenameMap[] = [];
+
+  // Detect generic names that need prefixing
+  // Order matters: compound names first (RoomSettings before Room)
+  const candidates: Array<{ pattern: RegExp; from: string; toSuffix: string }> = [
+    { pattern: /export\s+interface\s+RoomSettings\b/, from: 'RoomSettings', toSuffix: 'Settings' },
+    { pattern: /export\s+interface\s+Player\b/, from: 'Player', toSuffix: 'Player' },
+    { pattern: /export\s+interface\s+Room\s*\{/, from: 'Room', toSuffix: 'Room' },
+  ];
+
+  for (const c of candidates) {
+    if (c.pattern.test(typesContent)) {
+      const to = `${prefix}${c.toSuffix}`;
+      if (c.from !== to) {
+        renames.push({ from: c.from, to });
+      }
+    }
+  }
+
+  return renames;
+}
+
+function applyTypeRenames(content: string, renames: TypeRenameMap[]): string {
+  let result = content;
+  for (const r of renames) {
+    // Use word boundary + negative lookahead/behind to avoid partial matches
+    // RoomSettings must be renamed before Room to avoid Room→XRoom then XRoomSettings
+    if (r.from === 'Room') {
+      // Room but NOT RoomStatus, RoomSettings (already renamed), BaseRoom
+      result = result.replace(
+        new RegExp(`(?<!Base)\\b${r.from}\\b(?!Status|Settings)`, 'g'),
+        r.to
+      );
+    } else if (r.from === 'Player') {
+      // Player but NOT BasePlayer
+      result = result.replace(
+        new RegExp(`(?<!Base)\\b${r.from}\\b`, 'g'),
+        r.to
+      );
+    } else {
+      result = result.replace(
+        new RegExp(`\\b${r.from}\\b`, 'g'),
+        r.to
+      );
+    }
+  }
+  return result;
+}
+
 // ─── Import Adaptation ──────────────────────────────────────────────
 
 function adaptImports(content: string, gameId: string): string {
   let result = content;
 
   // === Absolute imports (@/) ===
-
-  // @/lib/types → @/lib/types/{gameId}
-  result = result.replace(
-    /from\s+['"]@\/lib\/types['"]/g,
-    `from '@/lib/types/${gameId}'`
-  );
-
-  // @/lib/firestore → @/lib/firestore/{gameId}
-  result = result.replace(
-    /from\s+['"]@\/lib\/firestore['"]/g,
-    `from '@/lib/firestore/${gameId}'`
-  );
-
-  // @/components/screens/X → @/components/games/{gameId}/X
-  result = result.replace(
-    /from\s+['"]@\/components\/screens\/([^'"]+)['"]/g,
-    `from '@/components/games/${gameId}/$1'`
-  );
-
-  // @/components/ui/X → @/components/shared/X
-  result = result.replace(
-    /from\s+['"]@\/components\/ui\/([^'"]+)['"]/g,
-    `from '@/components/shared/$1'`
-  );
+  result = result.replace(/from\s+['"]@\/lib\/types['"]/g, `from '@/lib/types/${gameId}'`);
+  result = result.replace(/from\s+['"]@\/lib\/firestore['"]/g, `from '@/lib/firestore/${gameId}'`);
+  result = result.replace(/from\s+['"]@\/components\/screens\/([^'"]+)['"]/g, `from '@/components/games/${gameId}/$1'`);
+  result = result.replace(/from\s+['"]@\/components\/ui\/([^'"]+)['"]/g, `from '@/components/shared/$1'`);
 
   // === Relative imports (./ and ../) ===
-
-  // ./firebase or ../firebase → @/lib/firebase
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+firebase['"]/g,
-    `from '@/lib/firebase'`
-  );
-
-  // ./types or ../types → @/lib/types/{gameId}
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+types['"]/g,
-    `from '@/lib/types/${gameId}'`
-  );
-
-  // ./types/core or ../types/core → @/lib/types/core
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+types\/core['"]/g,
-    `from '@/lib/types/core'`
-  );
-
-  // ./utils or ../utils → @/lib/utils
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+utils['"]/g,
-    `from '@/lib/utils'`
-  );
-
-  // ./prompts/index or ../prompts/index or ./prompts or ../prompts → @/lib/prompts/index
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+prompts(?:\/index)?['"]/g,
-    `from '@/lib/prompts/index'`
-  );
-
-  // ./firestore/core or ../firestore/core → @/lib/firestore/core
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+firestore\/core['"]/g,
-    `from '@/lib/firestore/core'`
-  );
-
-  // ./firestore or ../firestore → @/lib/firestore/{gameId}
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+firestore['"]/g,
-    `from '@/lib/firestore/${gameId}'`
-  );
-
-  // ../hooks/usePlayer or ./hooks/usePlayer → @/hooks/usePlayer
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+hooks\/usePlayer['"]/g,
-    `from '@/hooks/usePlayer'`
-  );
-
-  // ../hooks/useRoom or ./hooks/useRoom → @/hooks/useRoom
-  result = result.replace(
-    /from\s+['"](\.\.?\/)+hooks\/useRoom['"]/g,
-    `from '@/hooks/useRoom'`
-  );
+  result = result.replace(/from\s+['"](\.\.?\/)+firebase['"]/g, `from '@/lib/firebase'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+types\/core['"]/g, `from '@/lib/types/core'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+types['"]/g, `from '@/lib/types/${gameId}'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+utils['"]/g, `from '@/lib/utils'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+prompts(?:\/index)?['"]/g, `from '@/lib/prompts/index'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+firestore\/core['"]/g, `from '@/lib/firestore/core'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+firestore['"]/g, `from '@/lib/firestore/${gameId}'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+hooks\/usePlayer['"]/g, `from '@/hooks/usePlayer'`);
+  result = result.replace(/from\s+['"](\.\.?\/)+hooks\/useRoom['"]/g, `from '@/hooks/useRoom'`);
 
   return result;
 }
@@ -272,49 +264,30 @@ function adaptImports(content: string, gameId: string): string {
 function findRoomTypeName(typesFilePath: string): string | null {
   if (!fs.existsSync(typesFilePath)) return null;
   const content = fs.readFileSync(typesFilePath, 'utf-8');
-  const match = content.match(/export\s+interface\s+(\w+Room)\s+extends\s+BaseRoom/);
-  if (match) return match[1];
-  const match2 = content.match(/export\s+interface\s+(\w+Room)\s*\{/);
-  return match2 ? match2[1] : null;
+  const match = content.match(/export\s+interface\s+(\w+Room)\s/);
+  return match ? match[1] : null;
 }
 
 function hasImportFor(content: string, typeName: string): boolean {
-  const importRegex = new RegExp(
-    `import\\s+\\{[^}]*\\b${typeName}\\b[^}]*\\}\\s+from\\s+['"]`,
-  );
+  const importRegex = new RegExp(`import\\s+\\{[^}]*\\b${typeName}\\b[^}]*\\}\\s+from\\s+['"]`);
   return importRegex.test(content);
 }
 
 function adaptRoomPage(content: string, gameId: string, roomTypeName: string): string {
   let result = content;
 
-  // useRoom(code) → useRoom<RoomType>(code)
-  result = result.replace(
-    /useRoom\s*\(\s*code\s*\)/g,
-    `useRoom<${roomTypeName}>(code)`
-  );
+  result = result.replace(/useRoom\s*\(\s*code\s*\)/g, `useRoom<${roomTypeName}>(code)`);
 
-  // Add import for Room type only if no import statement already imports it
   if (!hasImportFor(result, roomTypeName)) {
     const typesImportPath = `@/lib/types/${gameId}`;
     const escapedPath = typesImportPath.replace(/\//g, '\\/');
-
-    // Check if there's already an import from this types path
-    const existingImportRegex = new RegExp(
-      `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escapedPath}['"]`
-    );
+    const existingImportRegex = new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escapedPath}['"]`);
     const existingMatch = result.match(existingImportRegex);
 
     if (existingMatch) {
-      // Add roomTypeName to existing import
       const currentImports = existingMatch[1].trim();
-      result = result.replace(
-        existingImportRegex,
-        `import { ${currentImports}, ${roomTypeName} } from '${typesImportPath}'`
-      );
-      log(`Import ${roomTypeName} dodat u postojeći import iz '${typesImportPath}'.`);
+      result = result.replace(existingImportRegex, `import { ${currentImports}, ${roomTypeName} } from '${typesImportPath}'`);
     } else {
-      // Add new import line after 'use client' directive
       const importLine = `import { ${roomTypeName} } from '${typesImportPath}';`;
       const useClientRegex = /^'use client';?\s*\n/m;
       if (useClientRegex.test(result)) {
@@ -322,7 +295,6 @@ function adaptRoomPage(content: string, gameId: string, roomTypeName: string): s
       } else {
         result = `${importLine}\n${result}`;
       }
-      log(`Novi import dodat: ${importLine}`);
     }
   }
 
@@ -330,6 +302,8 @@ function adaptRoomPage(content: string, gameId: string, roomTypeName: string): s
 }
 
 // ─── File Operations ─────────────────────────────────────────────────
+
+let globalTypeRenames: TypeRenameMap[] = [];
 
 function copyFileAdapted(
   src: string,
@@ -344,6 +318,9 @@ function copyFileAdapted(
   let content = fs.readFileSync(src, 'utf-8');
   if (src.endsWith('.ts') || src.endsWith('.tsx')) {
     content = adaptImports(content, gameId);
+    if (globalTypeRenames.length > 0) {
+      content = applyTypeRenames(content, globalTypeRenames);
+    }
   }
   writeFileTracked(dest, content, state);
 }
@@ -405,18 +382,15 @@ function copyComponents(config: GameConfig, tempGameDir: string, state: Rollback
 function copyPages(config: GameConfig, tempGameDir: string, state: RollbackState): void {
   const { home, room } = config.files.pages;
 
-  // Detect room type name from the types file
   const typesPath = path.join(ROOT, 'lib', 'types', `${config.id}.ts`);
   const roomTypeName = findRoomTypeName(typesPath) ?? `${toPascalCase(config.id)}Room`;
   log(`Detektovan Room tip: ${roomTypeName}`);
 
-  // Copy home page
   const homeSrc = path.join(tempGameDir, home);
   const homeDest = path.join(ROOT, 'app', 'games', config.id, 'page.tsx');
   log(`Kopiram home stranicu: ${home} → app/games/${config.id}/page.tsx`);
   copyFileAdapted(homeSrc, homeDest, config.id, state);
 
-  // Copy room page with extra adaptation
   const roomSrc = path.join(tempGameDir, room);
   const roomDest = path.join(ROOT, 'app', 'games', config.id, 'room', '[code]', 'page.tsx');
   log(`Kopiram room stranicu: ${room} → app/games/${config.id}/room/[code]/page.tsx`);
@@ -424,6 +398,9 @@ function copyPages(config: GameConfig, tempGameDir: string, state: RollbackState
   if (fs.existsSync(roomSrc)) {
     let content = fs.readFileSync(roomSrc, 'utf-8');
     content = adaptImports(content, config.id);
+    if (globalTypeRenames.length > 0) {
+      content = applyTypeRenames(content, globalTypeRenames);
+    }
     content = adaptRoomPage(content, config.id, roomTypeName);
     writeFileTracked(roomDest, content, state);
   } else {
@@ -457,19 +434,13 @@ function updateRegistry(config: GameConfig, isUpdate: boolean, state: RollbackSt
   }`;
 
   if (isUpdate) {
-    const entryRegex = new RegExp(
-      `\\{[^}]*id:\\s*'${config.id}'[^}]*\\}`,
-      's'
-    );
+    const entryRegex = new RegExp(`\\{[^}]*id:\\s*'${config.id}'[^}]*\\}`, 's');
     if (entryRegex.test(content)) {
       content = content.replace(entryRegex, newEntry.trim());
       log(`Registry entry za '${config.id}' ažuriran.`);
     }
   } else {
-    content = content.replace(
-      /^(\];)/m,
-      `${newEntry},\n$1`
-    );
+    content = content.replace(/^(\];)/m, `${newEntry},\n$1`);
     log(`Registry entry za '${config.id}' dodat.`);
   }
 
@@ -511,17 +482,11 @@ function rollback(state: RollbackState): void {
   log('Pokrećem rollback...');
 
   for (const file of state.createdFiles) {
-    if (fs.existsSync(file)) {
-      fs.unlinkSync(file);
-    }
+    if (fs.existsSync(file)) fs.unlinkSync(file);
   }
 
   for (const dir of state.createdDirs.reverse()) {
-    try {
-      fs.rmdirSync(dir);
-    } catch {
-      // folder nije prazan — ostavljamo ga
-    }
+    try { fs.rmdirSync(dir); } catch { /* not empty */ }
   }
 
   for (const [file, original] of state.modifiedFiles) {
@@ -588,7 +553,21 @@ async function main(): Promise<void> {
   const config = rawConfig as unknown as GameConfig;
   logSuccess(`Config validan: ${config.name} (${config.id}) v${config.version}`);
 
-  // 4. Check if game already exists
+  // 4. Detect type renames from source types file
+  const prefix = toPascalCase(config.id);
+  const srcTypesPath = path.join(TEMP_DIR, config.files.types);
+  if (fs.existsSync(srcTypesPath)) {
+    const srcTypesContent = fs.readFileSync(srcTypesPath, 'utf-8');
+    globalTypeRenames = detectTypeRenames(srcTypesContent, prefix);
+    if (globalTypeRenames.length > 0) {
+      log('Detektovana preimenovanja tipova:');
+      for (const r of globalTypeRenames) {
+        log(`  ${r.from} → ${r.to}`);
+      }
+    }
+  }
+
+  // 5. Check if game already exists
   const registryPath = path.join(ROOT, 'lib', 'games', 'registry.ts');
   const registryContent = fs.readFileSync(registryPath, 'utf-8');
   const gameExists = registryContent.includes(`id: '${config.id}'`);
@@ -607,7 +586,7 @@ async function main(): Promise<void> {
     log('Režim: DODAVANJE nove igre.');
   }
 
-  // 5. Start copying with rollback tracking
+  // 6. Start copying with rollback tracking
   const state: RollbackState = {
     createdFiles: [],
     createdDirs: [],
@@ -615,58 +594,35 @@ async function main(): Promise<void> {
   };
 
   try {
-    // Copy types (must be first — room page reads this to detect type name)
     copyTypes(config, TEMP_DIR, state);
-
-    // Copy firestore
     copyFirestore(config, TEMP_DIR, state);
-
-    // Copy prompts
     copyPrompts(config, TEMP_DIR, state);
-
-    // Copy components
     copyComponents(config, TEMP_DIR, state);
-
-    // Copy pages (reads types file to detect Room type name)
     copyPages(config, TEMP_DIR, state);
-
-    // Update registry
     updateRegistry(config, isUpdate, state);
-
-    // Update GameType union (only for new games)
-    if (!isUpdate) {
-      updateGameType(config.id, state);
-    }
+    if (!isUpdate) updateGameType(config.id, state);
 
     logSuccess('Svi fajlovi kopirani i importi adaptirani.');
 
-    // 6. Cleanup temp
     cleanupTemp();
     log('temp/ obrisan.');
 
-    // 7. Build check
     log('Pokrećem npm run build...');
     try {
       run('npm run build', ROOT);
       logSuccess('Build USPEŠAN!');
     } catch (err) {
       logError('Build NIJE PROŠAO!');
-      if (err instanceof Error) {
-        console.error(err.message.slice(0, 2000));
-      }
+      if (err instanceof Error) console.error(err.message.slice(0, 2000));
       rollback(state);
       process.exit(1);
     }
 
-    // 8. Git commit + push
     log('Kreiram git commit...');
     const verb = isUpdate ? 'Update' : 'Add';
     try {
       run('git add -A', ROOT);
-      run(
-        `git commit -m "${verb} game: ${config.name} v${config.version}"`,
-        ROOT
-      );
+      run(`git commit -m "${verb} game: ${config.name} v${config.version}"`, ROOT);
       log('Git push...');
       run('git push', ROOT);
       logSuccess(`Gotovo! ${config.name} je ${isUpdate ? 'ažuriran' : 'dodat'} u Game Hub.`);
