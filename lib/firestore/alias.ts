@@ -227,14 +227,19 @@ export async function scoreWord(
       queue.push(...getRandomWords(30));
     }
 
+    const newScore = room.scores[team] + delta;
+    const updatedScores = { ...room.scores, [team]: newScore };
+    const won = updatedScores.a >= room.settings.targetScore || updatedScores.b >= room.settings.targetScore;
+
     tx.update(ref, {
       roundResults: [
         ...room.roundResults,
         { word: room.currentWord, result },
       ],
-      scores: { ...room.scores, [team]: room.scores[team] + delta },
-      currentWord: nextWord,
+      scores: updatedScores,
+      currentWord: won ? null : nextWord,
       wordsQueue: queue,
+      ...(won ? { status: 'finished' as const, roundEndTime: null } : {}),
     });
   });
 }
@@ -275,6 +280,10 @@ export async function endRound(code: string): Promise<void> {
 
 export async function advanceToScoreboard(code: string): Promise<void> {
   await updateDoc(roomRef(code), { status: 'scoreboard' });
+}
+
+export async function finishGame(code: string): Promise<void> {
+  await updateDoc(roomRef(code), { status: 'finished' });
 }
 
 export async function nextRound(code: string): Promise<void> {

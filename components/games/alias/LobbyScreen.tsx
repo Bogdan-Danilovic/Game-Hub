@@ -158,6 +158,27 @@ export function LobbyScreen({ room, playerId }: Props) {
                 ))}
               </div>
             </div>
+
+            <div>
+              <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-3">Poeni za pobjedu</p>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => updateSettings(room.code, { targetScore: Math.max(10, room.settings.targetScore - 5) })}
+                  className="w-9 h-9 rounded-lg text-[14px] font-bold text-slate-500 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  −
+                </button>
+                <span className="text-[20px] font-bold text-white tabular-nums w-12 text-center">
+                  {room.settings.targetScore}
+                </span>
+                <button
+                  onClick={() => updateSettings(room.code, { targetScore: Math.min(100, room.settings.targetScore + 5) })}
+                  className="w-9 h-9 rounded-lg text-[14px] font-bold text-slate-500 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
           </motion.div>
         )}
 
