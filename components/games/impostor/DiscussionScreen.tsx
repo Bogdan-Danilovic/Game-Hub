@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ImpostorRoom } from '@/lib/types/impostor';
 import { advanceToVoting, shufflePrompt } from '@/lib/firestore/impostor';
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   room: ImpostorRoom;

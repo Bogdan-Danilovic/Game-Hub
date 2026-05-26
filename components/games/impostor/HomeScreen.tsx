@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/shared/Button';
-import { Input } from '@/components/shared/Input';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { createRoom, joinRoom } from '@/lib/firestore/impostor';
 
 const fadeIn = (delay = 0) => ({
@@ -43,7 +43,7 @@ export function HomeScreen() {
       const { code, playerId } = await createRoom(trimmedName);
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', trimmedName);
-      router.push(`/room/${code}`);
+      router.push(`/games/impostor/room/${code}`);
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Greška pri kreiranju sobe.');
       setLoading(null);
@@ -60,7 +60,7 @@ export function HomeScreen() {
       if (joinError) { showError(joinError); setLoading(null); return; }
       localStorage.setItem('playerId', playerId);
       localStorage.setItem('playerName', trimmedName);
-      router.push(`/room/${code}`);
+      router.push(`/games/impostor/room/${code}`);
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Greška pri pridruživanju.');
       setLoading(null);

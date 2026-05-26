@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImpostorRoom, Category, GameMode } from '@/lib/types/impostor';
 import { CATEGORIES } from '@/lib/prompts/index';
-import { Button } from '@/components/shared/Button';
-import { PlayerCard } from '@/components/shared/PlayerCard';
+import { Button } from '@/components/ui/Button';
+import { PlayerCard } from '@/components/ui/PlayerCard';
 import { updateRoomSettings, kickPlayer, startGame } from '@/lib/firestore/impostor';
 
 interface Props {
@@ -75,7 +75,7 @@ export function LobbyScreen({ room, playerId }: Props) {
     <div className="relative flex flex-col flex-1 px-8 py-10 h-screen-safe overflow-y-auto">
       <div className="relative w-full max-w-[360px] mx-auto flex flex-col gap-8 flex-1">
 
-        {/* ImpostorRoom code — decrypt style */}
+        {/* Room code — decrypt style */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ImpostorRoom } from '@/lib/types/impostor';
 import { castVote, processVotes } from '@/lib/firestore/impostor';
 import { tallyVotes, checkWinCondition } from '@/lib/utils';
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   room: ImpostorRoom;

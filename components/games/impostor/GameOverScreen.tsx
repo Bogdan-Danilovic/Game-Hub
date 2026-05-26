@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ImpostorRoom } from '@/lib/types/impostor';
 import { playAgain, leaveRoom } from '@/lib/firestore/impostor';
-import { Button } from '@/components/shared/Button';
+import { Button } from '@/components/ui/Button';
 
 interface Props {
   room: ImpostorRoom;
@@ -27,7 +27,7 @@ export function GameOverScreen({ room, playerId }: Props) {
   async function handleLeave() {
     await leaveRoom(room.code, playerId);
     localStorage.removeItem('playerId');
-    router.push('/');
+    router.push('/games/impostor');
   }
 
   return (
