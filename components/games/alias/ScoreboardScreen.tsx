@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { AliasRoom } from '@/lib/types/alias';
-import { nextRound } from '@/lib/firestore/alias';
+import { nextRound, finishGame } from '@/lib/firestore/alias';
 
 interface Props {
   room: AliasRoom;
@@ -107,14 +107,22 @@ export function ScoreboardScreen({ room, playerId }: Props) {
         </div>
 
         {/* Next round */}
-        <div className="w-full mt-4">
+        <div className="w-full mt-4 flex flex-col gap-2">
           {isHost ? (
-            <button
-              onClick={() => nextRound(room.code)}
-              className="w-full py-3.5 rounded-lg text-[13px] font-semibold bg-cyan-600 text-white hover:bg-cyan-500 transition-colors shadow-[0_0_20px_rgba(8,145,178,0.3)]"
-            >
-              {room.scores.a >= target || room.scores.b >= target ? 'Završi igru' : 'Sljedeća runda'}
-            </button>
+            <>
+              <button
+                onClick={() => nextRound(room.code)}
+                className="w-full py-3.5 rounded-lg text-[13px] font-semibold bg-cyan-600 text-white hover:bg-cyan-500 transition-colors shadow-[0_0_20px_rgba(8,145,178,0.3)]"
+              >
+                {room.scores.a >= target || room.scores.b >= target ? 'Završi igru' : 'Sljedeća runda'}
+              </button>
+              <button
+                onClick={() => finishGame(room.code)}
+                className="w-full py-3 rounded-lg text-[13px] font-medium text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] transition-colors"
+              >
+                Završi partiju
+              </button>
+            </>
           ) : (
             <p className="text-[11px] text-slate-500 text-center py-2">Čekamo host-a...</p>
           )}
