@@ -100,10 +100,10 @@ function assignRoles(
   while (goodRoles.length < goodIndices.length) goodRoles.push('good');
 
   const roleMap = new Map<number, { role: AvalonRole; loyalty: Loyalty }>();
-  evilIndices.forEach((idx, i) => {
+  evilIndices.forEach((idx: number, i: number) => {
     roleMap.set(idx, { role: evilRoles[i], loyalty: 'evil' });
   });
-  goodIndices.forEach((idx, i) => {
+  goodIndices.forEach((idx: number, i: number) => {
     roleMap.set(idx, { role: goodRoles[i], loyalty: 'good' });
   });
 

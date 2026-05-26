@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk } from 'next/font/google';
+import { Space_Grotesk, Geist } from 'next/font/google';
 import './globals.css';
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-space',
@@ -34,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sr" className={`${spaceGrotesk.variable} h-full antialiased`}>
+    <html lang="sr" className={cn("h-full", "antialiased", spaceGrotesk.variable, "font-sans", geist.variable)}>
       <body className="min-h-full flex flex-col bg-slate-800 text-slate-100 font-sans selection:bg-violet-500/30">
         {children}
       </body>
