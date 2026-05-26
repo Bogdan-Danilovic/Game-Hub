@@ -1,4 +1,4 @@
-import { CategoryData } from '../types';
+import { CategoryData } from '@/lib/types/impostor';
 
 export const popkultura: CategoryData = {
   label: 'Pop kultura',

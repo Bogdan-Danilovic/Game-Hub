@@ -1,5 +1,6 @@
 'use client';
 
+import { ImpostorRoom } from '@/lib/types/impostor';
 import { use, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/hooks/useRoom';
@@ -13,10 +14,10 @@ import { RevealScreen } from '@/components/games/impostor/RevealScreen';
 import { GameOverScreen } from '@/components/games/impostor/GameOverScreen';
 import { rejoinRoom, setPlayerDisconnected } from '@/lib/firestore/impostor';
 
-export default function ImpostorRoomPage({ params }: { params: Promise<{ code: string }> }) {
+export default function RoomPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
-  const { room, loading, error } = useRoom(code);
+  const { room, loading, error } = useRoom<ImpostorRoom>(code);
   const player = usePlayer();
   const hasRejoined = useRef(false);
 
@@ -35,21 +36,9 @@ export default function ImpostorRoomPage({ params }: { params: Promise<{ code: s
     const pid = player.id;
 
     const handleBeforeUnload = () => setPlayerDisconnected(code, pid);
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        setPlayerDisconnected(code, pid);
-      } else {
-        rejoinRoom(code, pid);
-      }
-    };
-
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [player.id, code]);
 
   if (loading) {
@@ -65,7 +54,7 @@ export default function ImpostorRoomPage({ params }: { params: Promise<{ code: s
       <div className="flex flex-col items-center justify-center flex-1 h-screen-safe gap-4">
         <p className="text-sm text-slate-400">{error || 'Soba ne postoji.'}</p>
         <button
-          onClick={() => router.push('/games/impostor')}
+          onClick={() => router.push('/')}
           className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
         >
           Nazad na početnu
@@ -88,7 +77,7 @@ export default function ImpostorRoomPage({ params }: { params: Promise<{ code: s
       <div className="flex flex-col items-center justify-center flex-1 h-screen-safe gap-4">
         <p className="text-sm text-slate-400">Nisi u ovoj sobi.</p>
         <button
-          onClick={() => router.push('/games/impostor')}
+          onClick={() => router.push('/')}
           className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
         >
           Nazad na početnu

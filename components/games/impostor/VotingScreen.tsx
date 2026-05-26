@@ -12,20 +12,15 @@ interface Props {
   playerId: string;
 }
 
-const listItem = {
-  hidden: { opacity: 0, x: -12 },
-  show: { opacity: 1, x: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } },
-};
-
 export function VotingScreen({ room, playerId }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
   const [processing, setProcessing] = useState(false);
+
   const isHost = room.hostId === playerId;
   const isAlive = room.players.find((p) => p.id === playerId)?.isAlive ?? false;
   const alivePlayers = room.players.filter((p) => p.isAlive);
   const votablePlayers = alivePlayers.filter((p) => p.id !== playerId);
-
   const totalAlive = alivePlayers.length;
   const totalVoted = Object.keys(room.votes).length;
   const allVoted = totalVoted >= totalAlive;
@@ -34,11 +29,11 @@ export function VotingScreen({ room, playerId }: Props) {
     if (playerId in room.votes) setHasVoted(true);
   }, [playerId, room.votes]);
 
-  async function handleVote(votedForId: string) {
+  async function handleVote(id: string) {
     if (hasVoted || !isAlive) return;
-    setSelected(votedForId);
+    setSelected(id);
     setHasVoted(true);
-    await castVote(room.code, playerId, votedForId);
+    await castVote(room.code, playerId, id);
   }
 
   async function handleSkip() {
@@ -48,98 +43,113 @@ export function VotingScreen({ room, playerId }: Props) {
     await castVote(room.code, playerId, 'skip');
   }
 
-  async function handleProcessVotes() {
+  async function handleProcess() {
     if (processing) return;
     setProcessing(true);
     const { eliminatedId } = tallyVotes(room.votes);
-
-    const updatedPlayers = eliminatedId
+    const updated = eliminatedId
       ? room.players.map((p) => (p.id === eliminatedId ? { ...p, isAlive: false } : p))
       : room.players;
-
-    const winner = eliminatedId
-      ? checkWinCondition(updatedPlayers, room.impostorIds)
-      : null;
-
+    const winner = eliminatedId ? checkWinCondition(updated, room.impostorIds) : null;
     await processVotes(room.code, eliminatedId, winner);
   }
 
   return (
-    <div className="flex flex-col flex-1 px-6 py-8 h-screen-safe">
-      <div className="w-full max-w-sm mx-auto flex flex-col gap-5 flex-1">
+    <div className="relative flex flex-col flex-1 px-8 py-10 h-screen-safe">
+      <div className="relative w-full max-w-[360px] mx-auto flex flex-col gap-6 flex-1">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center"
-        >
-          <h2 className="text-xl font-bold text-slate-100 tracking-tight">Glasanje</h2>
-          <p className="text-xs text-slate-400 mt-1">
-            {totalVoted} od {totalAlive} glasalo
-          </p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
+          <h2 className="text-[24px] font-bold text-white tracking-[-0.03em]">Glasanje</h2>
+          <p className="text-[11px] text-slate-500 mt-1">{totalVoted} od {totalAlive}</p>
         </motion.div>
 
-        {/* Progress bar */}
-        <div className="w-full h-1.5 bg-surface rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-violet-500 rounded-full"
-            animate={{ width: `${(totalVoted / totalAlive) * 100}%` }}
-            transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
-          />
+        {/* Radar progress */}
+        <div className="flex justify-center">
+          <div className="relative w-16 h-16">
+            {/* Radar ring */}
+            <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(139,92,246,0.08)" strokeWidth="2" />
+              <motion.circle
+                cx="32" cy="32" r="28" fill="none"
+                stroke="rgba(139,92,246,0.6)"
+                strokeWidth="2"
+                strokeDasharray={`${2 * Math.PI * 28}`}
+                strokeLinecap="round"
+                animate={{ strokeDashoffset: 2 * Math.PI * 28 * (1 - totalVoted / totalAlive) }}
+                transition={{ type: 'spring' as const, stiffness: 100, damping: 20 }}
+              />
+            </svg>
+            {/* Sweep line */}
+            {!allVoted && (
+              <motion.div
+                className="absolute inset-0"
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
+              >
+                <div className="absolute top-1/2 left-1/2 w-[1px] h-1/2 origin-bottom bg-gradient-to-t from-violet-500/60 to-transparent" style={{ transform: 'translate(-50%, -100%)' }} />
+              </motion.div>
+            )}
+            {/* Center count */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-[14px] font-bold text-violet-400 tabular-nums">
+                {totalVoted}
+              </span>
+            </div>
+          </div>
         </div>
 
-        {/* Who voted (anonymous chips) */}
+        {/* Voter chips */}
         <div className="flex flex-wrap gap-1.5 justify-center">
           {alivePlayers.map((p) => {
             const voted = p.id in room.votes;
             return (
-              <motion.div
+              <motion.span
                 key={p.id}
-                animate={{ opacity: voted ? 1 : 0.5 }}
-                className={`
-                  px-2.5 py-1 rounded-lg text-xs transition-colors duration-300
-                  ${voted
-                    ? 'bg-violet-500/20 text-violet-300 border border-violet-500/20'
-                    : 'bg-surface/40 text-slate-500 border border-slate-600/10'
-                  }
-                `}
+                animate={{ opacity: voted ? 1 : 0.35 }}
+                className={`text-[10px] px-2 py-0.5 rounded-md transition-all duration-500 ${
+                  voted ? 'text-violet-300 bg-violet-500/10' : 'text-slate-600'
+                }`}
               >
                 {p.name}{voted ? ' ✓' : ''}
-              </motion.div>
+              </motion.span>
             );
           })}
         </div>
 
-        {/* Vote options OR waiting state */}
+        {/* Vote options */}
         <AnimatePresence mode="wait">
           {isAlive && !hasVoted ? (
             <motion.div
-              key="voting"
-              initial="hidden"
-              animate="show"
-              exit={{ opacity: 0 }}
-              variants={{ show: { transition: { staggerChildren: 0.04 } } }}
-              className="flex flex-col gap-2"
+              key="options"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="flex flex-col gap-1"
             >
-              {votablePlayers.map((p) => (
+              {votablePlayers.map((p, i) => (
                 <motion.button
                   key={p.id}
-                  variants={listItem}
-                  whileTap={{ scale: 0.98 }}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.04, type: 'spring' as const, stiffness: 300, damping: 24 }}
+                  whileTap={{ scale: 0.98, x: 4 }}
                   onClick={() => handleVote(p.id)}
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-left bg-surface/60 border border-slate-600/30 text-slate-200 hover:border-violet-500/30 hover:bg-surface-light/40 transition-all duration-150"
+                  className="flex items-center gap-3 px-4 py-3.5 text-left text-[13px] font-medium text-slate-300 rounded-lg hover:bg-white/[0.03] transition-colors duration-150"
                 >
-                  <span className="text-sm font-medium">{p.name}</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+                  {p.name}
                 </motion.button>
               ))}
 
-              <div className="h-px bg-slate-600/20 my-1" />
+              <div className="h-px bg-white/[0.03] my-2" />
 
               <motion.button
-                variants={listItem}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: votablePlayers.length * 0.04 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSkip}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-slate-500 bg-transparent border border-dashed border-slate-600/30 hover:text-slate-400 hover:border-slate-500/40 transition-all duration-150"
+                className="py-3 text-[11px] text-slate-600 hover:text-slate-400 transition-colors"
               >
                 Preskoči glasanje
               </motion.button>
@@ -151,34 +161,29 @@ export function VotingScreen({ room, playerId }: Props) {
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center flex-1 gap-3"
             >
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                className="text-3xl"
-              >
-                🗳️
-              </motion.div>
-              <p className="text-sm text-slate-400">
-                {!isAlive
-                  ? 'Eliminisan si — ne možeš da glasaš'
-                  : selected === 'skip'
-                    ? 'Preskočio si glasanje. Čekamo ostale...'
-                    : 'Glasao si. Čekamo ostale...'}
+              <p className="text-[12px] text-slate-500">
+                {!isAlive ? 'Eliminisan si' : selected === 'skip' ? 'Preskočio si' : 'Glasao si'}
               </p>
+              <motion.p
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ repeat: Infinity, duration: 2.5 }}
+                className="text-[11px] text-slate-600"
+              >
+                čekamo ostale...
+              </motion.p>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Process votes (host, all voted) */}
+        {/* Process */}
         <AnimatePresence>
           {isHost && allVoted && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ type: 'spring' as const, stiffness: 300, damping: 24 }}
               className="mt-auto pt-4"
             >
-              <Button fullWidth onClick={handleProcessVotes} disabled={processing}>
+              <Button fullWidth onClick={handleProcess} disabled={processing}>
                 {processing ? 'Obrađujem...' : 'Otkrij rezultat'}
               </Button>
             </motion.div>

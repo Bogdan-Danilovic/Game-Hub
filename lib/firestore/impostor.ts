@@ -4,14 +4,14 @@ import {
   getDoc,
   setDoc,
   updateDoc,
-  deleteDoc,
   runTransaction,
   Unsubscribe,
 } from 'firebase/firestore';
-import { db } from '../firebase';
-import { ImpostorRoom, ImpostorPlayer, GameMode, Category, ImpostorSettings } from '../types/impostor';
-import { generateRoomCode, generatePlayerId, selectImpostors, getImpostorCount } from '../utils';
-import { getRandomPrompt } from '../prompts/index';
+import { db } from '@/lib/firebase';
+import { ImpostorRoom, ImpostorPlayer, GameMode, Category, ImpostorSettings } from '@/lib/types/impostor';
+import { generateRoomCode, generatePlayerId, selectImpostors, getImpostorCount } from '@/lib/utils';
+import { getRandomPrompt } from '@/lib/prompts/index';
+
 import { roomRef, subscribeToRoom } from './core';
 
 function newRoom(code: string, hostId: string, player: ImpostorPlayer): ImpostorRoom {
@@ -103,14 +103,6 @@ export async function rejoinRoom(code: string, playerId: string): Promise<void> 
       ),
     });
   });
-}
-
-export function subscribeToImpostorRoom(
-  code: string,
-  callback: (room: ImpostorRoom | null) => void,
-  onError?: (err: Error) => void
-): Unsubscribe {
-  return subscribeToRoom<ImpostorRoom>(code, callback, onError);
 }
 
 export async function updateRoomSettings(
@@ -276,11 +268,17 @@ export async function setPlayerDisconnected(
       if (nextHost) updates.hostId = nextHost.id;
     }
 
-    if (room.impostorIds.includes(playerId) && room.status !== 'lobby') {
-      const remaining = room.impostorIds.filter((id) => id !== playerId);
-      if (remaining.length === 0) {
+    if (room.status !== 'lobby') {
+      const connectedAlive = players.filter((p) => p.isConnected && p.isAlive);
+      if (connectedAlive.length < 3) {
         updates.status = 'finished';
-        updates.winner = 'crew';
+        updates.winner = null;
+      } else if (room.impostorIds.includes(playerId)) {
+        const remaining = room.impostorIds.filter((id) => id !== playerId);
+        if (remaining.length === 0) {
+          updates.status = 'finished';
+          updates.winner = 'crew';
+        }
       }
     }
 
@@ -298,10 +296,7 @@ export async function leaveRoom(code: string, playerId: string): Promise<void> {
 
     if (room.status === 'lobby') {
       const players = room.players.filter((p) => p.id !== playerId);
-      if (players.length === 0) {
-        tx.delete(ref);
-        return;
-      }
+      if (players.length === 0) return;
 
       const updates: Partial<ImpostorRoom> & { players: ImpostorPlayer[] } = { players };
       if (room.hostId === playerId) updates.hostId = players[0].id;
@@ -317,7 +312,11 @@ export async function leaveRoom(code: string, playerId: string): Promise<void> {
         if (nextHost) updates.hostId = nextHost.id;
       }
 
-      if (room.impostorIds.includes(playerId)) {
+      const connectedAlive = players.filter((p) => p.isConnected && p.isAlive);
+      if (connectedAlive.length < 3) {
+        updates.status = 'finished';
+        updates.winner = null;
+      } else if (room.impostorIds.includes(playerId)) {
         const remaining = room.impostorIds.filter((id) => id !== playerId);
         if (remaining.length === 0) {
           updates.status = 'finished';

@@ -5,7 +5,6 @@ export {
   createRoom,
   joinRoom,
   rejoinRoom,
-  subscribeToImpostorRoom,
   updateRoomSettings,
   shufflePrompt,
   kickPlayer,
