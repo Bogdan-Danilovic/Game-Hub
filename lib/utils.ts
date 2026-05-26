@@ -1,3 +1,10 @@
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function secureRandom(max: number): number {
@@ -33,10 +40,7 @@ export function getImpostorCount(playerCount: number, desired: number): number {
   return Math.min(desired, max);
 }
 
-export function selectImpostors(
-  playerIds: string[],
-  count: number
-): string[] {
+export function selectImpostors(playerIds: string[], count: number): string[] {
   const shuffled = [...playerIds];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = secureRandom(i + 1);
