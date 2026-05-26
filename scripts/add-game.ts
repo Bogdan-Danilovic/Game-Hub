@@ -278,43 +278,51 @@ function findRoomTypeName(typesFilePath: string): string | null {
   return match2 ? match2[1] : null;
 }
 
+function hasImportFor(content: string, typeName: string): boolean {
+  const importRegex = new RegExp(
+    `import\\s+\\{[^}]*\\b${typeName}\\b[^}]*\\}\\s+from\\s+['"]`,
+  );
+  return importRegex.test(content);
+}
+
 function adaptRoomPage(content: string, gameId: string, roomTypeName: string): string {
   let result = content;
 
-  // useRoom(code) → useRoom<ImpostorRoom>(code)
+  // useRoom(code) → useRoom<RoomType>(code)
   result = result.replace(
     /useRoom\s*\(\s*code\s*\)/g,
     `useRoom<${roomTypeName}>(code)`
   );
 
-  // Add import for Room type if not already present
-  if (!result.includes(`import`) || !result.includes(roomTypeName)) {
+  // Add import for Room type only if no import statement already imports it
+  if (!hasImportFor(result, roomTypeName)) {
     const typesImportPath = `@/lib/types/${gameId}`;
-    // Check if there's already an import from this path
-    const existingImport = new RegExp(
-      `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${typesImportPath.replace(/\//g, '\\/')}['"]`
+    const escapedPath = typesImportPath.replace(/\//g, '\\/');
+
+    // Check if there's already an import from this types path
+    const existingImportRegex = new RegExp(
+      `import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escapedPath}['"]`
     );
-    const existingMatch = result.match(existingImport);
+    const existingMatch = result.match(existingImportRegex);
+
     if (existingMatch) {
       // Add roomTypeName to existing import
-      const imports = existingMatch[1];
-      if (!imports.includes(roomTypeName)) {
-        result = result.replace(
-          existingImport,
-          `import {${imports}, ${roomTypeName} } from '${typesImportPath}'`
-        );
-      }
+      const currentImports = existingMatch[1].trim();
+      result = result.replace(
+        existingImportRegex,
+        `import { ${currentImports}, ${roomTypeName} } from '${typesImportPath}'`
+      );
+      log(`Import ${roomTypeName} dodat u postojeći import iz '${typesImportPath}'.`);
     } else {
-      // Add new import line after 'use client' or at the top
-      const importLine = `import { ${roomTypeName} } from '${typesImportPath}';\n`;
-      if (result.includes("'use client'")) {
-        result = result.replace(
-          /('use client';?\s*\n)/,
-          `$1\n${importLine}`
-        );
+      // Add new import line after 'use client' directive
+      const importLine = `import { ${roomTypeName} } from '${typesImportPath}';`;
+      const useClientRegex = /^'use client';?\s*\n/m;
+      if (useClientRegex.test(result)) {
+        result = result.replace(useClientRegex, `$&${importLine}\n`);
       } else {
-        result = importLine + result;
+        result = `${importLine}\n${result}`;
       }
+      log(`Novi import dodat: ${importLine}`);
     }
   }
 
