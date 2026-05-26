@@ -25,136 +25,149 @@ export function RevealScreen({ room, playerId }: Props) {
   }, [room.eliminatedId, isSingleImpostor, room.settings.revealOnVote]);
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 px-6 py-8 h-screen-safe">
-      <div className="w-full max-w-sm flex flex-col items-center gap-6">
+    <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
+      {/* Ambient pulse */}
+      <motion.div
+        className="fixed inset-0 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: 1,
+          background: wasImpostor
+            ? 'radial-gradient(ellipse at center, rgba(239,68,68,0.05) 0%, transparent 70%)'
+            : 'radial-gradient(ellipse at center, rgba(139,92,246,0.04) 0%, transparent 70%)',
+        }}
+        transition={{ delay: 1, duration: 1.5 }}
+      />
 
+      <div className="relative w-full max-w-[320px] flex flex-col items-center gap-8">
         {room.eliminatedId && eliminated ? (
           <>
-            {/* Eliminated name */}
+            {/* Dossier — opens from center */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, type: 'spring' as const, stiffness: 200, damping: 20 }}
-              className="text-center"
+              initial={{ scaleY: 0, opacity: 0 }}
+              animate={{ scaleY: 1, opacity: 1 }}
+              transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full origin-center"
             >
-              <p className="text-xs text-slate-400 uppercase tracking-widest mb-3">
-                Eliminisan
-              </p>
-              <p className="text-3xl font-bold text-slate-100 tracking-tight">
-                {eliminated.name}
-              </p>
+              <div className="w-full bg-surface/40 rounded-lg p-6 relative overflow-hidden">
+                {/* Top line accent */}
+                <motion.div
+                  className={`absolute top-0 left-0 right-0 h-[2px] ${wasImpostor ? 'bg-red-500/60' : 'bg-violet-500/40'}`}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.8, duration: 0.4 }}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                >
+                  <p className="text-[9px] text-slate-500 tracking-[0.25em] uppercase mb-4">
+                    Dosije agenta
+                  </p>
+
+                  <p className="text-[28px] font-bold text-white tracking-[-0.02em] mb-1">
+                    {eliminated.name}
+                  </p>
+
+                  <p className="text-[10px] text-slate-500 tracking-[0.15em] uppercase mb-6">
+                    Eliminisan u rundi {room.round}
+                  </p>
+                </motion.div>
+
+                {/* Role reveal — stamped */}
+                {showRole && (
+                  <motion.div
+                    initial={{ scale: 2, opacity: 0, rotate: -15 }}
+                    animate={{ scale: 1, opacity: 1, rotate: -3 }}
+                    transition={{ delay: 1.5, type: 'spring' as const, stiffness: 300, damping: 20 }}
+                    className={`
+                      inline-block px-4 py-2 rounded-sm text-[14px] font-black uppercase tracking-[0.15em] border-2
+                      ${wasImpostor
+                        ? 'text-red-400 border-red-500/40 bg-red-500/5'
+                        : 'text-emerald-400 border-emerald-500/30 bg-emerald-500/5'
+                      }
+                    `}
+                  >
+                    {wasImpostor ? '⛔ IMPOSTOR' : '✓ CREWMATE'}
+                  </motion.div>
+                )}
+
+                {!showRole && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1.2 }}
+                    className="text-[12px] text-slate-500 italic"
+                  >
+                    Klasifikovano — uloga ostaje tajna
+                  </motion.p>
+                )}
+              </div>
             </motion.div>
 
-            {/* Role reveal with glow pulse */}
-            {showRole && (
-              <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1, type: 'spring' as const, stiffness: 200, damping: 15 }}
-                className="relative"
-              >
-                {/* Animated glow ring */}
-                <motion.div
-                  className={`absolute -inset-3 rounded-2xl ${wasImpostor ? 'bg-red-500/20' : 'bg-emerald-500/15'}`}
-                  animate={{ opacity: [0, 0.8, 0.3], scale: [0.95, 1.05, 1] }}
-                  transition={{ duration: 1.2, delay: 1.1 }}
-                />
-                <div
-                  className={`
-                    relative px-8 py-4 rounded-xl text-lg font-bold
-                    ${wasImpostor
-                      ? 'bg-red-950/60 text-red-400 border border-red-500/40 glow-danger'
-                      : 'bg-emerald-950/40 text-emerald-400 border border-emerald-500/30'
-                    }
-                  `}
-                >
-                  {wasImpostor ? '🎭 Bio je Impostor!' : '✅ Nije bio Impostor'}
+            {/* Prompts */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2 }}
+              className="w-full space-y-2"
+            >
+              <p className="text-[9px] text-slate-500 tracking-[0.2em] uppercase mb-1">Pitanja</p>
+              <div className="flex gap-2 text-[11px]">
+                <div className="flex-1 py-2 px-3 bg-violet-500/[0.04] rounded-md">
+                  <p className="text-violet-400/50 text-[8px] uppercase tracking-wider mb-0.5">Crew</p>
+                  <p className="text-slate-400">{room.currentPrompt.crew}</p>
                 </div>
-              </motion.div>
-            )}
-
-            {!showRole && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1 }}
-                className="px-6 py-3 rounded-xl text-sm text-slate-400 bg-surface/60 border border-slate-600/30"
-              >
-                Uloga ostaje tajna...
-              </motion.div>
-            )}
+                <div className="flex-1 py-2 px-3 bg-red-500/[0.04] rounded-md">
+                  <p className="text-red-400/50 text-[8px] uppercase tracking-wider mb-0.5">Imp</p>
+                  <p className="text-slate-400">{room.currentPrompt.impostor}</p>
+                </div>
+              </div>
+            </motion.div>
           </>
         ) : (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, type: 'spring' as const, stiffness: 200, damping: 20 }}
-            className="text-center"
-          >
-            <p className="text-4xl mb-4">🤷</p>
-            <p className="text-lg font-semibold text-slate-300 tracking-tight">
-              Izjednačen rezultat
-            </p>
-            <p className="text-sm text-slate-500 mt-1">
-              Niko nije eliminisan
-            </p>
-          </motion.div>
-        )}
-
-        {/* Game over banner */}
-        {gameOver && (
-          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.8, type: 'spring' as const, stiffness: 300, damping: 24 }}
-            className={`
-              w-full text-center px-6 py-5 rounded-2xl
-              ${room.winner === 'crew'
-                ? 'bg-emerald-950/30 border border-emerald-500/20'
-                : 'bg-red-950/30 border border-red-500/20'
-              }
-            `}
+            transition={{ delay: 0.3 }}
+            className="text-center"
           >
-            <p className="text-xl font-bold tracking-tight">
-              {room.winner === 'crew' ? '🎉 Crewmate tim pobeđuje!' : '🎭 Impostor pobeđuje!'}
+            <p className="text-3xl mb-4">—</p>
+            <p className="text-[16px] font-bold text-slate-300 tracking-[-0.01em]">Nema eliminacije</p>
+            <p className="text-[12px] text-slate-500 mt-1">Glasovi izjednačeni</p>
+          </motion.div>
+        )}
+
+        {/* Game over */}
+        {gameOver && (
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.3 }}
+            className={`w-full text-center py-5 rounded-lg ${
+              room.winner === 'crew' ? 'bg-emerald-500/[0.06]' : 'bg-red-500/[0.06]'
+            }`}
+          >
+            <p className="text-[18px] font-bold tracking-[-0.02em]">
+              {room.winner === 'crew' ? 'Crewmate tim pobeđuje' : 'Impostor pobeđuje'}
             </p>
           </motion.div>
         )}
 
-        {/* Both prompts preview */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: gameOver ? 2.2 : 1.6 }}
-          className="w-full space-y-2"
-        >
-          <p className="text-xs text-slate-500 uppercase tracking-widest text-center mb-1">Pitanja</p>
-          <div className="px-4 py-2.5 rounded-xl bg-violet-950/15 border border-violet-500/10">
-            <p className="text-[10px] text-violet-400 uppercase tracking-wider mb-0.5">Crewmate</p>
-            <p className="text-xs text-slate-300">{room.currentPrompt.crew}</p>
-          </div>
-          <div className="px-4 py-2.5 rounded-xl bg-red-950/15 border border-red-500/10">
-            <p className="text-[10px] text-red-400 uppercase tracking-wider mb-0.5">Impostor</p>
-            <p className="text-xs text-slate-300">{room.currentPrompt.impostor}</p>
-          </div>
-        </motion.div>
-
-        {/* Host controls */}
+        {/* Controls */}
         {isHost && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: gameOver ? 2.5 : 2 }}
+            transition={{ delay: gameOver ? 2.8 : 2.4 }}
             className="w-full"
           >
             {gameOver ? (
-              <Button fullWidth onClick={() => finishGame(room.code)}>
-                Prikaži rezultate
-              </Button>
+              <Button fullWidth onClick={() => finishGame(room.code)}>Prikaži rezultate</Button>
             ) : (
-              <Button fullWidth onClick={() => nextRound(room.code)}>
-                Sledeća runda
-              </Button>
+              <Button fullWidth onClick={() => nextRound(room.code)}>Sledeća runda</Button>
             )}
           </motion.div>
         )}
@@ -162,9 +175,9 @@ export function RevealScreen({ room, playerId }: Props) {
         {!isHost && (
           <motion.p
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2 }}
-            className="text-xs text-slate-500"
+            animate={{ opacity: 0.4 }}
+            transition={{ delay: 2.2 }}
+            className="text-[10px] text-slate-500"
           >
             Čekamo host-a...
           </motion.p>

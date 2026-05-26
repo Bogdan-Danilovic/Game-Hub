@@ -291,6 +291,46 @@ function adaptRoomPage(content: string, gameId: string, roomTypeName: string): s
   return result;
 }
 
+// ─── Firestore File Transformation ───────────────────────────────────
+
+function adaptFirestoreFile(content: string, gameId: string): string {
+  let result = content;
+
+  // Remove local roomRef function (it's in core.ts)
+  result = result.replace(
+    /function roomRef\([^)]*\)\s*\{[^}]*\}\s*\n\n?/,
+    ''
+  );
+
+  // Remove local subscribeToRoom export (it's in core.ts)
+  result = result.replace(
+    /export\s+function\s+subscribeToRoom\s*\([\s\S]*?\n\}\s*\n\n?/,
+    ''
+  );
+
+  // Remove doc and onSnapshot from firebase/firestore imports
+  result = result.replace(/\s*doc,\s*\n/g, '\n');
+  result = result.replace(/\s*onSnapshot,\s*\n/g, '\n');
+
+  // Add import for roomRef from core after last import
+  const coreImportLine = `import { roomRef, subscribeToRoom } from './core';\n`;
+  const lastImportMatch = result.match(/^import .+from .+;\s*$/gm);
+  if (lastImportMatch) {
+    const lastImport = lastImportMatch[lastImportMatch.length - 1];
+    const idx = result.lastIndexOf(lastImport);
+    const insertPos = idx + lastImport.length;
+    result = result.slice(0, insertPos) + '\n' + coreImportLine + result.slice(insertPos);
+  }
+
+  // Add gameType to newRoom return object (after hostId,)
+  result = result.replace(
+    /(function\s+newRoom[\s\S]*?return\s*\{[\s\S]*?hostId,\s*\n)/,
+    `$1    gameType: '${gameId}',\n`
+  );
+
+  return result;
+}
+
 // ─── File Operations ─────────────────────────────────────────────────
 
 let globalTypeRenames: TypeRenameMap[] = [];
@@ -334,7 +374,13 @@ function copyFirestore(config: GameConfig, tempGameDir: string, state: RollbackS
   const src = path.join(tempGameDir, config.files.firestore);
   const dest = path.join(ROOT, 'lib', 'firestore', `${config.id}.ts`);
   log(`Kopiram firestore: ${config.files.firestore} → lib/firestore/${config.id}.ts`);
-  copyFileAdapted(src, dest, config.id, state);
+
+  if (!fs.existsSync(src)) { logError(`Fajl ne postoji: ${src}`); return; }
+  let content = fs.readFileSync(src, 'utf-8');
+  content = adaptImports(content, config.id);
+  if (globalTypeRenames.length > 0) content = applyTypeRenames(content, globalTypeRenames);
+  content = adaptFirestoreFile(content, config.id);
+  writeFileTracked(dest, content, state);
 }
 
 function copyPrompts(config: GameConfig, tempGameDir: string, state: RollbackState): void {

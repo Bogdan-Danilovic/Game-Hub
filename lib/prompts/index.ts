@@ -1,4 +1,4 @@
-import { Category, CategoryData } from '../types';
+import { Category, CategoryData } from '@/lib/types/impostor';
 import { hrana } from './hrana';
 import { filmovi } from './filmovi';
 import { sport } from './sport';
