@@ -92,7 +92,7 @@ function GameCard({
           borderColor: borderActive ? hexA(accent, 0.6) : hexA(accent, 0.15),
           boxShadow: borderActive ? `0 0 20px ${hexA(accent, 0.3)}` : `0 0 0px ${hexA(accent, 0)}`,
         }}
-        transition={FAN_SPRING}
+        transition={reduce ? { duration: 0 } : FAN_SPRING}
       />
 
       {!reduce && <CardParticles accent={accent} />}
@@ -120,14 +120,14 @@ function GameCard({
             }}
             initial={false}
             animate={{ opacity: iconActive ? 0.95 : 0.4 }}
-            transition={ICON_SPRING}
+            transition={reduce ? { duration: 0 } : ICON_SPRING}
           />
           <motion.span
             className="leading-none"
             style={{ fontSize: 64, filter: `drop-shadow(0 0 12px ${hexA(accent, 0.6)})` }}
             initial={false}
             animate={{ scale: iconActive ? 1.15 : 1 }}
-            transition={ICON_SPRING}
+            transition={reduce ? { duration: 0 } : ICON_SPRING}
           >
             {game.icon}
           </motion.span>
@@ -185,7 +185,7 @@ function GameCard({
         }}
         initial={false}
         animate={{ y: overlayShown ? '0%' : '115%' }}
-        transition={CTA_SPRING}
+        transition={reduce ? { duration: 0 } : CTA_SPRING}
       >
         <span className="text-sm font-bold tracking-wide" style={{ color: '#fff' }}>
           {unavailable ? 'USKORO' : 'IGRAJ'}
@@ -318,6 +318,9 @@ export default function GameGallery() {
                 }}
               >
                 <motion.div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={g.available ? `Igraj ${g.name}` : `${g.name} — uskoro`}
                   style={{
                     width: 264,
                     height: 360,
@@ -326,10 +329,18 @@ export default function GameGallery() {
                     willChange: 'transform',
                   }}
                   animate={target}
-                  transition={FAN_SPRING}
+                  transition={reduce ? { duration: 0 } : FAN_SPRING}
                   onHoverStart={() => setHovered(i)}
                   onHoverEnd={() => setHovered((h) => (h === i ? null : h))}
+                  onFocus={() => setHovered(i)}
+                  onBlur={() => setHovered((h) => (h === i ? null : h))}
                   onClick={() => open(g)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      open(g);
+                    }
+                  }}
                 >
                   <GameCard game={g} hovered={isHovered} variant="desktop" />
                 </motion.div>

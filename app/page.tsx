@@ -39,7 +39,7 @@ export default function HubPage() {
         >
           Izaberi igru
         </h1>
-        <p className="text-sm mt-2 tracking-wide" style={{ color: '#64748b' }}>
+        <p className="text-sm mt-2 tracking-wide" style={{ color: '#94a3b8' }}>
           Tvoj hub za društvene igre
         </p>
       </header>
