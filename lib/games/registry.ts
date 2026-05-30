@@ -69,7 +69,7 @@ export const GAMES: GameDefinition[] = [
     maxPlayers: 18,
     avgDuration: '15-30 min',
     path: '/games/flip7',
-    available: false,
+    available: true,
     tags: ['karte', 'sreća', 'blef'],
   },
   {
