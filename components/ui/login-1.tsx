@@ -1,9 +1,12 @@
 'use client';
 
+import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import Link from 'next/link';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '@/hooks/useAuth';
+import { auth } from '@/lib/firebase';
 
 type Props = {
   isOpen: boolean;
@@ -15,6 +18,18 @@ type Props = {
   signupUrl?: string;
 };
 
+function mapAuthError(code: string): string {
+  switch (code) {
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': return 'Pogrešna lozinka ili email adresa';
+    case 'auth/user-not-found': return 'Korisnik sa ovim emailom ne postoji';
+    case 'auth/invalid-email': return 'Nevažeća email adresa';
+    case 'auth/too-many-requests': return 'Previše pokušaja. Pokušaj ponovo kasnije';
+    case 'auth/user-disabled': return 'Nalog je onemogućen';
+    default: return 'Prijava nije uspela';
+  }
+}
+
 export function Login1({
   isOpen,
   onClose,
@@ -24,7 +39,28 @@ export function Login1({
   signupText = 'Nemaš nalog?',
   signupUrl = '/register',
 }: Props) {
-  const { signInWithGoogle, loading, error } = useAuth();
+  const { signInWithGoogle, loading: googleLoading } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleEmailSignIn() {
+    if (!email || !password) return;
+    setError(null);
+    setLoading(true);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      onClose();
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code ?? '';
+      setError(mapAuthError(code));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const busy = loading || googleLoading;
 
   return (
     <AnimatePresence>
@@ -55,10 +91,39 @@ export function Login1({
 
             <h2 className="text-[20px] font-bold text-white mb-6">{heading}</h2>
 
+            <input
+              type="email"
+              placeholder="Email adresa"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              disabled={busy}
+              className="w-full px-4 py-3 rounded-xl text-[14px] mb-3 outline-none transition-all duration-200 disabled:opacity-50"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white',
+              }}
+            />
+
+            <input
+              type="password"
+              placeholder="Lozinka"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleEmailSignIn(); }}
+              disabled={busy}
+              className="w-full px-4 py-3 rounded-xl text-[14px] mb-4 outline-none transition-all duration-200 disabled:opacity-50"
+              style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'white',
+              }}
+            />
+
             <button
               type="button"
-              onClick={signInWithGoogle}
-              disabled={loading}
+              onClick={handleEmailSignIn}
+              disabled={busy || !email || !password}
               className="w-full py-3 rounded-xl text-[14px] font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mb-3 cursor-pointer"
               style={{ background: '#f59e0b', color: '#0f1219' }}
             >
@@ -68,7 +133,7 @@ export function Login1({
             <button
               type="button"
               onClick={signInWithGoogle}
-              disabled={loading}
+              disabled={busy}
               className="w-full py-3 rounded-xl text-[14px] font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 mb-5 cursor-pointer"
               style={{
                 background: 'transparent',

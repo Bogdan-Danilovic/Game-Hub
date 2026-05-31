@@ -10,10 +10,10 @@ import type { RewardResult } from '@/hooks/useRewardedVideo';
 
 type DonationLevel = 'malo' | 'srednje' | 'puno';
 
-const LEVELS: Record<DonationLevel, { label: string; videos: number; seconds: number; emoji: string }> = {
-  malo:    { label: 'Malo',    videos: 1, seconds: 15,  emoji: '☕' },
-  srednje: { label: 'Srednje', videos: 2, seconds: 30,  emoji: '🍕' },
-  puno:    { label: 'Puno',    videos: 3, seconds: 60,  emoji: '🎮' },
+const LEVELS: Record<DonationLevel, { label: string; videos: number; seconds: number }> = {
+  malo:    { label: 'Malo',    videos: 1, seconds: 15  },
+  srednje: { label: 'Srednje', videos: 2, seconds: 30  },
+  puno:    { label: 'Puno',    videos: 3, seconds: 60  },
 };
 
 type Phase = 'pick' | 'watching' | 'done';
@@ -102,7 +102,6 @@ export function DonationModal({ isOpen, onClose }: Props) {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <span className="text-[20px]">{lvl.emoji}</span>
                           <div>
                             <p className="text-[13px] font-medium text-white">{lvl.label}</p>
                             <p className="text-[10px] text-slate-500">
@@ -139,7 +138,7 @@ export function DonationModal({ isOpen, onClose }: Props) {
             {phase === 'watching' && selected && (
               <>
                 <p className="text-[14px] font-semibold text-white mb-4">
-                  {LEVELS[selected].emoji} {LEVELS[selected].label} donacija
+                  {LEVELS[selected].label} donacija
                 </p>
                 <RewardedVideo
                   count={LEVELS[selected].videos}
