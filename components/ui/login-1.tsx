@@ -62,7 +62,9 @@ export function Login1({
       await signInWithEmailAndPassword(auth, email, password);
       onClose();
     } catch (err: unknown) {
-      setError(mapAuthError((err as { code?: string }).code ?? ''));
+      const e = err as { code?: string; message?: string };
+      console.log('[AUTH DIAG] signIn →', e.code, '|', e.message);
+      setError(mapAuthError(e.code ?? ''));
     } finally {
       setLoading(false);
     }
@@ -84,7 +86,9 @@ export function Login1({
       await createUserWithEmailAndPassword(auth, email, password);
       onClose();
     } catch (err: unknown) {
-      setError(mapAuthError((err as { code?: string }).code ?? ''));
+      const e = err as { code?: string; message?: string };
+      console.log('[AUTH DIAG] register →', e.code, '|', e.message);
+      setError(mapAuthError(e.code ?? ''));
     } finally {
       setLoading(false);
     }

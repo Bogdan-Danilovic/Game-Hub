@@ -72,6 +72,8 @@ export function useAuth(): UseAuthReturn {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (err) {
+      const e = err as { code?: string; message?: string };
+      console.log('[AUTH DIAG] google →', e.code, '|', e.message);
       setError(err instanceof Error ? err.message : 'Prijava nije uspela');
       setLoading(false);
     }
