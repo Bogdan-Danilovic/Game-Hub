@@ -21,6 +21,9 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'GameHub',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-3801758630975994',
+  },
 };
 
 export const viewport: Viewport = {
