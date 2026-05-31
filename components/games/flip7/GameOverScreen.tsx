@@ -1,10 +1,14 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { Timestamp } from 'firebase/firestore';
 import { Flip7Room } from '@/lib/types/flip7';
 import { Button } from '@/components/ui/Button';
 import { playAgain, leaveRoom } from '@/lib/firestore/flip7';
+import { useAuth } from '@/hooks/useAuth';
+import { writeGameHistory, incrementStats } from '@/lib/firestore/gameHistory';
 
 interface Props {
   room: Flip7Room;
@@ -13,6 +17,25 @@ interface Props {
 
 export function GameOverScreen({ room, playerId }: Props) {
   const router = useRouter();
+  const { user, isLoggedIn } = useAuth();
+  const hasSaved = useRef(false);
+
+  useEffect(() => {
+    if (!isLoggedIn || !user || hasSaved.current) return;
+    hasSaved.current = true;
+    const isWinner = room.winnerId === playerId;
+    const isHost = room.hostId === playerId;
+    const gameId = `${room.code}_${room.createdAt}`;
+    writeGameHistory(user.uid, gameId, {
+      roomCode: room.code,
+      gameName: 'flip7',
+      playedAt: Timestamp.now(),
+      isWinner,
+      players: room.players.map((p) => p.name),
+    }).catch(() => {});
+    incrementStats(user.uid, isWinner, isHost).catch(() => {});
+  }, [isLoggedIn, user]);
+
   const isHost = room.hostId === playerId;
   const winner = room.players.find((p) => p.id === room.winnerId);
   const ranked = [...room.players].sort((a, b) => b.totalScore - a.totalScore);

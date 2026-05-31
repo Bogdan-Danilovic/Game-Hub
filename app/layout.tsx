@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import { AuthHeaderSlot } from '@/components/auth/AuthHeaderSlot';
+import { GuestBanner } from '@/components/auth/GuestBanner';
+import { UsernameSetup } from '@/components/auth/UsernameSetup';
 
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-sans',
@@ -63,10 +66,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               style={{ background: '#10b981', boxShadow: '0 0 6px #10b981' }}
             />
             <span className="text-[11px] text-slate-500 font-medium">Online</span>
+            <AuthHeaderSlot />
           </div>
         </header>
 
         {children}
+        <GuestBanner />
+        <UsernameSetup />
       </body>
     </html>
   );

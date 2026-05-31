@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# obsidian
+.obsidian/
+
 # testing
 /coverage
 
@@ -42,6 +45,17 @@ next-env.d.ts
 
 # unrelated nested project (separate git repo, not part of Game-Hub)
 /ECC/
+
+# accidental zero-byte garbage files
+/({,
+/38px
+/Iz
+/host
+/{,+
+
+# playwright
+/playwright-report/
+/test-results/
 
 # IDE / AI tool configs
 .agent/
