@@ -5,7 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
 import { Button } from '@/components/ui/Button';
 import { Flip7PlayerPanel } from '@/components/games/flip7/Flip7PlayerPanel';
-import { sayJosJednu, sayDosta, applyStop, applyOkreniTri } from '@/lib/firestore/flip7';
+import {
+  sayJosJednu,
+  sayDosta,
+  applyStop,
+  applyOkreniTri,
+  hostSkipTarget,
+} from '@/lib/firestore/flip7';
 
 interface Props {
   room: Flip7Room;
@@ -29,6 +35,10 @@ export function GameScreen({ room, playerId }: Props) {
   const chooser = pending.byPlayerId ? room.players.find((p) => p.id === pending.byPlayerId) : null;
   const activePlayers = room.players.filter((p) => p.status === 'active');
   const focusedId = pending.type === null ? target?.id : pending.byPlayerId;
+
+  const isHost = room.hostId === playerId;
+  const blocker = focusedId ? room.players.find((p) => p.id === focusedId) : null;
+  const canHostSkip = isHost && !!blocker && !blocker.isConnected;
 
   async function run(fn: () => Promise<void>) {
     if (busy) return;
@@ -88,7 +98,24 @@ export function GameScreen({ room, playerId }: Props) {
         }}
       >
         <AnimatePresence mode="wait">
-          {iResolve && pending.type ? (
+          {canHostSkip ? (
+            <motion.div key="host-skip" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-2.5">
+              <p className="text-[12px] text-amber-100/70 text-center">
+                <span className="font-semibold text-amber-400">{blocker?.name ?? 'Igrač'}</span> nije povezan
+                {pending.type
+                  ? ` — treba da reši ${pending.type === 'stop' ? 'STOP' : 'OKRENI TRI'}`
+                  : ' a na potezu je'}
+              </p>
+              <Button
+                fullWidth
+                disabled={busy}
+                onClick={() => run(() => hostSkipTarget(room.code, playerId))}
+                className="!bg-amber-500 !text-[#0a1626] hover:!bg-amber-400 active:!bg-amber-600"
+              >
+                Preskoči igrača
+              </Button>
+            </motion.div>
+          ) : iResolve && pending.type ? (
             <motion.div key="resolve" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-3">
               <div>
                 <p className="text-[12px] font-bold text-amber-400 tracking-wide uppercase">
@@ -118,6 +145,7 @@ export function GameScreen({ room, playerId }: Props) {
           ) : pending.type ? (
             <motion.p key="wait-pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] text-amber-100/50 text-center py-3">
               {chooser?.name ?? 'Igrač'} bira metu za {pending.type === 'stop' ? 'STOP' : 'OKRENI TRI'}…
+              {chooser && !chooser.isConnected && <span className="text-amber-100/30"> · nije povezan</span>}
             </motion.p>
           ) : myTurn ? (
             <motion.div key="my-turn" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex gap-3">
@@ -153,6 +181,9 @@ export function GameScreen({ room, playerId }: Props) {
               >
                 {target?.name ?? '—'}
               </motion.span>
+              {target && !target.isConnected && (
+                <span className="text-[12px] text-amber-100/30"> · nije povezan</span>
+              )}
             </motion.p>
           )}
         </AnimatePresence>

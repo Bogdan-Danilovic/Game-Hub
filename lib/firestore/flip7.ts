@@ -387,6 +387,52 @@ export async function applyOkreniTri(code: string, targetId: string): Promise<vo
   });
 }
 
+/**
+ * Host-only escape hatch for the disconnect-stall edge: when the player the game
+ * is waiting on (the current target, or the chooser of a pending Stop/Okreni tri)
+ * has dropped offline, the host forces them to exit the round safely (banking
+ * their points, like "Dosta"), clears any pending action, and advances the turn.
+ */
+export async function hostSkipTarget(code: string, hostId: string): Promise<void> {
+  const ref = roomRef(code);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+
+    const room = snap.data() as Flip7Room;
+    if (room.status !== 'playing') return;
+    if (room.hostId !== hostId) return;
+
+    const blockerId =
+      room.pendingAction.type !== null
+        ? room.pendingAction.byPlayerId
+        : (room.players[room.currentTargetIndex]?.id ?? null);
+    if (!blockerId) return;
+
+    const blocker = room.players.find((p) => p.id === blockerId);
+    if (!blocker || blocker.isConnected) return;
+
+    const players = room.players.map((p) =>
+      p.id === blockerId && p.status === 'active' ? { ...p, status: 'exited' as const } : p
+    );
+
+    const updates: Record<string, unknown> = {
+      players,
+      pendingAction: { type: null, byPlayerId: null },
+      lastEvent: `Domaćin je preskočio igrača ${blocker.name} (nije povezan).`,
+    };
+
+    if (activePlayerCount(players) === 0) {
+      updates.players = calculateRoundScores(players);
+      updates.status = 'round_end';
+    } else {
+      updates.currentTargetIndex = nextActiveIndex(players, room.currentTargetIndex);
+    }
+
+    tx.update(ref, updates);
+  });
+}
+
 export async function nextRound(code: string): Promise<void> {
   const ref = roomRef(code);
   await runTransaction(db, async (tx) => {
