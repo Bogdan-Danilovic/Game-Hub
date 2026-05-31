@@ -1,0 +1,177 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { RewardedVideo } from '@/components/ads/RewardedVideo';
+import { estimateEarningUsd, getEcpmTier, type EcpmTier } from '@/lib/monetization/estimate';
+import { recordDonation } from '@/lib/monetization/donations';
+import type { RewardResult } from '@/hooks/useRewardedVideo';
+
+type DonationLevel = 'malo' | 'srednje' | 'puno';
+
+const LEVELS: Record<DonationLevel, { label: string; videos: number; seconds: number; emoji: string }> = {
+  malo:    { label: 'Malo',    videos: 1, seconds: 15,  emoji: '☕' },
+  srednje: { label: 'Srednje', videos: 2, seconds: 30,  emoji: '🍕' },
+  puno:    { label: 'Puno',    videos: 3, seconds: 60,  emoji: '🎮' },
+};
+
+type Phase = 'pick' | 'watching' | 'done';
+
+type Props = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export function DonationModal({ isOpen, onClose }: Props) {
+  const [phase, setPhase] = useState<Phase>('pick');
+  const [selected, setSelected] = useState<DonationLevel | null>(null);
+  const [tier, setTier] = useState<EcpmTier>('tier3');
+  const [earned, setEarned] = useState(0);
+
+  // Geo-lokacija: jednokratno, samo za procenu — ne šalje nigde
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch('https://ipapi.co/country/')
+      .then(r => r.text())
+      .then(cc => setTier(getEcpmTier(cc.trim())))
+      .catch(() => setTier('tier3'));
+  }, [isOpen]);
+
+  function handleClose() {
+    setPhase('pick');
+    setSelected(null);
+    setEarned(0);
+    onClose();
+  }
+
+  async function handleComplete(result: RewardResult) {
+    if (!result.completed || !selected) return;
+    const est = estimateEarningUsd(result.videosWatched, tier);
+    setEarned(est);
+    try {
+      await recordDonation(result.videosWatched, est);
+    } catch {
+      // Ne blokira UX ako increment ne uspe
+    }
+    setPhase('done');
+  }
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-end justify-center"
+          style={{ background: 'rgba(8,11,20,0.85)' }}
+          onClick={e => { if (e.target === e.currentTarget) handleClose(); }}
+        >
+          <motion.div
+            initial={{ y: 60, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 60, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+            className="w-full max-w-[440px] rounded-t-2xl px-5 pt-5 pb-8"
+            style={{ background: 'var(--bg-surface, #0f1729)', border: '1px solid rgba(255,255,255,0.06)' }}
+          >
+            {/* Handle */}
+            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
+            {phase === 'pick' && (
+              <>
+                <p className="text-[14px] font-semibold text-white mb-1">Podržite razvoj</p>
+                <p className="text-[11px] text-slate-500 mb-5">
+                  Gledaj kratke video reklame — zarada ide direktno u razvoj igre.
+                </p>
+
+                <div className="flex flex-col gap-2.5">
+                  {(Object.entries(LEVELS) as [DonationLevel, typeof LEVELS['malo']][]).map(([key, lvl]) => {
+                    const est = estimateEarningUsd(lvl.videos, tier);
+                    const isActive = selected === key;
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => setSelected(key)}
+                        className="flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer"
+                        style={{
+                          background: isActive ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${isActive ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-[20px]">{lvl.emoji}</span>
+                          <div>
+                            <p className="text-[13px] font-medium text-white">{lvl.label}</p>
+                            <p className="text-[10px] text-slate-500">
+                              {lvl.videos} {lvl.videos === 1 ? 'video' : 'videa'} · ~{lvl.seconds}s
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-slate-400">~${est.toFixed(3)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  disabled={!selected}
+                  onClick={() => selected && setPhase('watching')}
+                  className="w-full mt-5 py-3.5 rounded-xl text-[13px] font-semibold text-white transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  style={{
+                    background: selected ? 'linear-gradient(135deg, #7c3aed, #8b5cf6)' : 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${selected ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.08)'}`,
+                    boxShadow: selected ? '0 0 16px rgba(139,92,246,0.3)' : 'none',
+                  }}
+                >
+                  Pogledaj {selected ? `${LEVELS[selected].videos} ${LEVELS[selected].videos === 1 ? 'video' : 'videa'}` : 'video'}
+                </button>
+
+                <button onClick={handleClose} className="w-full mt-2 py-2 text-[12px] text-slate-600 hover:text-slate-500 cursor-pointer transition-colors">
+                  Možda drugi put
+                </button>
+              </>
+            )}
+
+            {phase === 'watching' && selected && (
+              <>
+                <p className="text-[14px] font-semibold text-white mb-4">
+                  {LEVELS[selected].emoji} {LEVELS[selected].label} donacija
+                </p>
+                <RewardedVideo
+                  count={LEVELS[selected].videos}
+                  onComplete={handleComplete}
+                  onCancel={() => setPhase('pick')}
+                />
+              </>
+            )}
+
+            {phase === 'done' && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center gap-3 py-6"
+              >
+                <span className="text-[40px]">🙏</span>
+                <p className="text-[15px] font-semibold text-white">Hvala!</p>
+                <p className="text-[12px] text-slate-400 text-center">
+                  Procenjena zarada: <span className="text-emerald-400">${earned.toFixed(3)}</span>
+                </p>
+                <p className="text-[10px] text-slate-600 text-center">
+                  Ovo je procena zasnovana na prosečnom eCPM za tvoj region.
+                </p>
+                <button
+                  onClick={handleClose}
+                  className="mt-4 px-8 py-2.5 rounded-xl text-[13px] font-medium text-white cursor-pointer"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  Zatvori
+                </button>
+              </motion.div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}

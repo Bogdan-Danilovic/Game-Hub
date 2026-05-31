@@ -4,6 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AliasRoom } from '@/lib/types/alias';
 import { updateSettings, kickPlayer, startGame } from '@/lib/firestore/alias';
+import { AdBanner } from '@/components/ads/AdBanner';
+import { HostUnlockButton } from '@/components/ads/HostUnlockButton';
+import { DonationModal } from '@/components/ads/DonationModal';
 import { PlayerCard } from '@/components/ui/PlayerCard';
 
 interface Props {
@@ -43,6 +46,7 @@ export function LobbyScreen({ room, playerId }: Props) {
   const [starting, setStarting] = useState(false);
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [donationOpen, setDonationOpen] = useState(false);
 
   const isHost = room.hostId === playerId;
   const playerCount = room.players.length;
@@ -181,6 +185,27 @@ export function LobbyScreen({ room, playerId }: Props) {
             Čekamo da host započne igru...
           </motion.p>
         )}
+
+        {/* TODO: zameniti slot ID — prikazuje se samo u lobby fazi */}
+        <AdBanner slot="TODO_SLOT_LOBBY" format="horizontal" className="mt-4 rounded-xl overflow-hidden" />
+
+        {isHost && (
+          <div className="mt-3">
+            <HostUnlockButton roomCode={room.code} />
+          </div>
+        )}
+
+        <div className="mt-3">
+          <button
+            onClick={() => setDonationOpen(true)}
+            className="w-full py-2.5 rounded-xl text-[11px] text-slate-600 hover:text-slate-500 transition-colors cursor-pointer"
+            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            Podržite razvoj — gledaj video
+          </button>
+        </div>
+
+        <DonationModal isOpen={donationOpen} onClose={() => setDonationOpen(false)} />
 
         <div className="mt-auto pt-4">
           {isHost && (

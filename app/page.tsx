@@ -1,4 +1,5 @@
 import GameGallery from '@/components/hub/GameGallery';
+import { AdBanner } from '@/components/ads/AdBanner';
 
 export default function HubPage() {
   return (
@@ -44,9 +45,15 @@ export default function HubPage() {
       </header>
 
       {/* Gallery */}
-      <section className="relative z-10 w-full flex-1 flex items-center justify-center pb-24">
+      <section className="relative z-10 w-full flex-1 flex items-center justify-center pb-8">
         <GameGallery />
       </section>
+
+      {/* Ad baner — ispod galerije, nikad tokom igre */}
+      <div className="relative z-10 w-full max-w-[500px] px-4 pb-8 mx-auto">
+        {/* TODO: zameniti slot ID iz AdSense dashboarda */}
+        <AdBanner slot="TODO_SLOT_HUB" format="horizontal" />
+      </div>
     </main>
   );
 }
