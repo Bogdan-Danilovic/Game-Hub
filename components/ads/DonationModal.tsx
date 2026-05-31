@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PlayCircle, Sparkles } from 'lucide-react';
 import { RewardedVideo } from '@/components/ads/RewardedVideo';
 import { estimateEarningUsd, getEcpmTier, type EcpmTier } from '@/lib/monetization/estimate';
 import { recordDonation } from '@/lib/monetization/donations';
@@ -93,10 +94,11 @@ export function DonationModal({ isOpen, onClose }: Props) {
                       <button
                         key={key}
                         onClick={() => setSelected(key)}
-                        className="flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer"
+                        className="flex items-center justify-between px-4 py-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer hover:scale-[1.02]"
                         style={{
-                          background: isActive ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.03)',
-                          border: `1px solid ${isActive ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                          background: '#161b27',
+                          border: `1px solid ${isActive ? '#f59e0b' : 'rgba(255,255,255,0.06)'}`,
+                          transform: isActive ? 'scale(1.02)' : undefined,
                         }}
                       >
                         <div className="flex items-center gap-3">
@@ -108,7 +110,7 @@ export function DonationModal({ isOpen, onClose }: Props) {
                             </p>
                           </div>
                         </div>
-                        <span className="text-[11px] text-slate-400">~${est.toFixed(3)}</span>
+                        <span className="text-[13px] font-semibold" style={{ color: '#f59e0b' }}>~${est.toFixed(3)}</span>
                       </button>
                     );
                   })}
@@ -117,14 +119,15 @@ export function DonationModal({ isOpen, onClose }: Props) {
                 <button
                   disabled={!selected}
                   onClick={() => selected && setPhase('watching')}
-                  className="w-full mt-5 py-3.5 rounded-xl text-[13px] font-semibold text-white transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-full mt-5 py-3.5 rounded-xl text-[13px] font-semibold transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
                   style={{
-                    background: selected ? 'linear-gradient(135deg, #7c3aed, #8b5cf6)' : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${selected ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.08)'}`,
-                    boxShadow: selected ? '0 0 16px rgba(139,92,246,0.3)' : 'none',
+                    background: selected ? '#f59e0b' : 'rgba(255,255,255,0.05)',
+                    color: selected ? '#0f1219' : 'rgba(255,255,255,0.25)',
+                    border: `1px solid ${selected ? '#f59e0b' : 'rgba(255,255,255,0.08)'}`,
                   }}
                 >
-                  Pogledaj {selected ? `${LEVELS[selected].videos} ${LEVELS[selected].videos === 1 ? 'video' : 'videa'}` : 'video'}
+                  <PlayCircle size={16} />
+                  Pogledaj video
                 </button>
 
                 <button onClick={handleClose} className="w-full mt-2 py-2 text-[12px] text-slate-600 hover:text-slate-500 cursor-pointer transition-colors">
@@ -150,20 +153,26 @@ export function DonationModal({ isOpen, onClose }: Props) {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
                 className="flex flex-col items-center gap-3 py-6"
               >
-                <span className="text-[40px]">🙏</span>
-                <p className="text-[15px] font-semibold text-white">Hvala!</p>
-                <p className="text-[12px] text-slate-400 text-center">
-                  Procenjena zarada: <span className="text-emerald-400">${earned.toFixed(3)}</span>
-                </p>
-                <p className="text-[10px] text-slate-600 text-center">
-                  Ovo je procena zasnovana na prosečnom eCPM za tvoj region.
-                </p>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.4, delay: 0.05 }}
+                >
+                  <Sparkles size={40} style={{ color: '#f59e0b' }} />
+                </motion.div>
+                <h1 className="text-[24px] font-bold text-white">Hvala ti!</h1>
+                <p className="text-[14px] text-slate-500">Pomogao si razvoju GameHub-a</p>
+                <div className="text-center mt-2">
+                  <p className="text-[12px] text-slate-500 mb-1">Tvoj doprinos</p>
+                  <p className="text-[32px] font-bold" style={{ color: '#f59e0b' }}>${earned.toFixed(3)}</p>
+                </div>
                 <button
                   onClick={handleClose}
-                  className="mt-4 px-8 py-2.5 rounded-xl text-[13px] font-medium text-white cursor-pointer"
-                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  className="mt-4 px-8 py-2.5 rounded-xl text-[13px] font-medium cursor-pointer transition-all duration-200 hover:bg-amber-500/10 active:scale-95"
+                  style={{ border: '1px solid #f59e0b', color: '#f59e0b', background: 'transparent' }}
                 >
                   Zatvori
                 </button>
