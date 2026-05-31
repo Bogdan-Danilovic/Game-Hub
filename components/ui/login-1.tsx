@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import Link from 'next/link';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { auth } from '@/lib/firebase';
+
+type Tab = 'prijava' | 'registracija';
 
 type Props = {
   isOpen: boolean;
@@ -20,32 +21,40 @@ type Props = {
 
 function mapAuthError(code: string): string {
   switch (code) {
-    case 'auth/wrong-password':
+    case 'auth/wrong-password': return 'Pogrešna lozinka';
     case 'auth/invalid-credential': return 'Pogrešna lozinka ili email adresa';
-    case 'auth/user-not-found': return 'Korisnik sa ovim emailom ne postoji';
+    case 'auth/user-not-found': return 'Nalog sa ovim emailom ne postoji';
+    case 'auth/email-already-in-use': return 'Email adresa je već registrovana';
+    case 'auth/weak-password': return 'Lozinka mora imati najmanje 6 karaktera';
     case 'auth/invalid-email': return 'Nevažeća email adresa';
     case 'auth/too-many-requests': return 'Previše pokušaja. Pokušaj ponovo kasnije';
     case 'auth/user-disabled': return 'Nalog je onemogućen';
-    default: return 'Prijava nije uspela';
+    default: return 'Greška pri autentifikaciji';
   }
 }
 
 export function Login1({
   isOpen,
   onClose,
-  heading = 'Dobrodošao nazad',
-  buttonText = 'Prijavi se',
   googleText = 'Nastavi sa Google-om',
-  signupText = 'Nemaš nalog?',
-  signupUrl = '/register',
 }: Props) {
   const { signInWithGoogle, loading: googleLoading } = useAuth();
+  const [tab, setTab] = useState<Tab>('prijava');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleEmailSignIn() {
+  function switchTab(t: Tab) {
+    setTab(t);
+    setEmail('');
+    setPassword('');
+    setConfirm('');
+    setError(null);
+  }
+
+  async function handleSignIn() {
     if (!email || !password) return;
     setError(null);
     setLoading(true);
@@ -53,14 +62,36 @@ export function Login1({
       await signInWithEmailAndPassword(auth, email, password);
       onClose();
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? '';
-      setError(mapAuthError(code));
+      setError(mapAuthError((err as { code?: string }).code ?? ''));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRegister() {
+    if (!email || !password || !confirm) return;
+    if (password.length < 8) {
+      setError('Lozinka mora imati najmanje 8 karaktera');
+      return;
+    }
+    if (password !== confirm) {
+      setError('Lozinke se ne poklapaju');
+      return;
+    }
+    setError(null);
+    setLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      onClose();
+    } catch (err: unknown) {
+      setError(mapAuthError((err as { code?: string }).code ?? ''));
     } finally {
       setLoading(false);
     }
   }
 
   const busy = loading || googleLoading;
+  const isRegistracija = tab === 'registracija';
 
   return (
     <AnimatePresence>
@@ -79,7 +110,7 @@ export function Login1({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ duration: 0.3 }}
-            className="relative w-full max-w-[360px] rounded-2xl px-6 pt-8 pb-7 mx-4"
+            className="relative w-full max-w-[360px] rounded-2xl px-6 pt-6 pb-7 mx-4"
             style={{ background: '#161b27', border: '1px solid rgba(255,255,255,0.07)' }}
           >
             <button
@@ -89,7 +120,21 @@ export function Login1({
               <X size={18} />
             </button>
 
-            <h2 className="text-[20px] font-bold text-white mb-6">{heading}</h2>
+            <div className="flex gap-1 mb-6 p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              {(['prijava', 'registracija'] as Tab[]).map(t => (
+                <button
+                  key={t}
+                  onClick={() => switchTab(t)}
+                  className="flex-1 py-2 rounded-lg text-[13px] font-medium transition-all duration-200 cursor-pointer"
+                  style={{
+                    background: tab === t ? '#f59e0b' : 'transparent',
+                    color: tab === t ? '#0f1219' : 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  {t === 'prijava' ? 'Prijava' : 'Registracija'}
+                </button>
+              ))}
+            </div>
 
             <input
               type="email"
@@ -98,11 +143,7 @@ export function Login1({
               onChange={e => setEmail(e.target.value)}
               disabled={busy}
               className="w-full px-4 py-3 rounded-xl text-[14px] mb-3 outline-none transition-all duration-200 disabled:opacity-50"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'white',
-              }}
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
             />
 
             <input
@@ -110,53 +151,49 @@ export function Login1({
               placeholder="Lozinka"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') handleEmailSignIn(); }}
+              onKeyDown={e => { if (e.key === 'Enter' && !isRegistracija) handleSignIn(); }}
               disabled={busy}
-              className="w-full px-4 py-3 rounded-xl text-[14px] mb-4 outline-none transition-all duration-200 disabled:opacity-50"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: 'white',
-              }}
+              className="w-full px-4 py-3 rounded-xl text-[14px] mb-3 outline-none transition-all duration-200 disabled:opacity-50"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
             />
+
+            {isRegistracija && (
+              <input
+                type="password"
+                placeholder="Potvrdi lozinku"
+                value={confirm}
+                onChange={e => setConfirm(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleRegister(); }}
+                disabled={busy}
+                className="w-full px-4 py-3 rounded-xl text-[14px] mb-3 outline-none transition-all duration-200 disabled:opacity-50"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
+              />
+            )}
 
             <button
               type="button"
-              onClick={handleEmailSignIn}
-              disabled={busy || !email || !password}
-              className="w-full py-3 rounded-xl text-[14px] font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mb-3 cursor-pointer"
+              onClick={isRegistracija ? handleRegister : handleSignIn}
+              disabled={busy || !email || !password || (isRegistracija && !confirm)}
+              className="w-full mt-1 py-3 rounded-xl text-[14px] font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mb-3 cursor-pointer"
               style={{ background: '#f59e0b', color: '#0f1219' }}
             >
-              {loading ? 'Prijavljivanje...' : buttonText}
+              {loading
+                ? (isRegistracija ? 'Registracija...' : 'Prijavljivanje...')
+                : (isRegistracija ? 'Registruj se' : 'Prijavi se')}
             </button>
 
             <button
               type="button"
               onClick={signInWithGoogle}
               disabled={busy}
-              className="w-full py-3 rounded-xl text-[14px] font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 mb-5 cursor-pointer"
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: 'rgba(255,255,255,0.8)',
-              }}
+              className="w-full py-3 rounded-xl text-[14px] font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5 mb-4 cursor-pointer"
+              style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.8)' }}
             >
               <GoogleIcon />
               {googleText}
             </button>
 
-            {error && <p className="text-xs text-red-400 text-center mb-4">{error}</p>}
-
-            <p className="text-center text-[12px] text-slate-500">
-              {signupText}{' '}
-              <Link
-                href={signupUrl}
-                className="text-amber-400 hover:text-amber-300 transition-colors duration-150"
-                onClick={onClose}
-              >
-                Registruj se
-              </Link>
-            </p>
+            {error && <p className="text-xs text-red-400 text-center">{error}</p>}
           </motion.div>
         </motion.div>
       )}
