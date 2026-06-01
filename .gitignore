@@ -79,3 +79,5 @@ skills-lock.json
 .github/prompts/
 **/__pycache__/
 *.pyc
+.vercel
+.env*
