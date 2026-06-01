@@ -4,9 +4,8 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   onAuthStateChanged,
   signInAnonymously,
-  signInWithRedirect,
-  getRedirectResult,
-  linkWithRedirect,
+  signInWithPopup,
+  linkWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   type User as FirebaseUser,
@@ -32,13 +31,6 @@ export function useAuth(): UseAuthReturn {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Handle the redirect result once on mount (fires after Google redirect returns).
-  useEffect(() => {
-    getRedirectResult(auth).catch(() => {
-      // Redirect result errors are handled by onAuthStateChanged below.
-    });
-  }, []);
 
   useEffect(() => {
     let unsubscribeProfile: (() => void) | undefined;
@@ -93,7 +85,7 @@ export function useAuth(): UseAuthReturn {
       // Upgrade a guest account in place so its stats/friends survive the sign-in.
       if (current?.isAnonymous) {
         try {
-          await linkWithRedirect(current, provider);
+          await linkWithPopup(current, provider);
           return;
         } catch (linkErr) {
           const code = (linkErr as { code?: string }).code;
@@ -103,7 +95,7 @@ export function useAuth(): UseAuthReturn {
           }
         }
       }
-      await signInWithRedirect(auth, provider);
+      await signInWithPopup(auth, provider);
     } catch (err) {
       const e = err as { code?: string; message?: string };
       console.log('[AUTH DIAG] google →', e.code, '|', e.message);
