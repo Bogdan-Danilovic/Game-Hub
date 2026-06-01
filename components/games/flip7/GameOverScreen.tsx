@@ -3,12 +3,11 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Timestamp } from 'firebase/firestore';
 import { Flip7Room } from '@/lib/types/flip7';
 import { Button } from '@/components/ui/Button';
 import { playAgain, leaveRoom } from '@/lib/firestore/flip7';
 import { useAuth } from '@/hooks/useAuth';
-import { writeGameHistory, incrementStats } from '@/lib/firestore/gameHistory';
+import { recordGameResult } from '@/lib/firestore/players';
 
 interface Props {
   room: Flip7Room;
@@ -17,24 +16,23 @@ interface Props {
 
 export function GameOverScreen({ room, playerId }: Props) {
   const router = useRouter();
-  const { user, isLoggedIn } = useAuth();
+  const { user } = useAuth();
   const hasSaved = useRef(false);
 
   useEffect(() => {
-    if (!isLoggedIn || !user || hasSaved.current) return;
+    if (!user || hasSaved.current) return;
     hasSaved.current = true;
-    const isWinner = room.winnerId === playerId;
-    const isHost = room.hostId === playerId;
-    const gameId = `${room.code}_${room.createdAt}`;
-    writeGameHistory(user.uid, gameId, {
-      roomCode: room.code,
+    recordGameResult({
+      playerId: user.uid,
+      gameType: 'flip7',
       gameName: 'flip7',
-      playedAt: Timestamp.now(),
-      isWinner,
-      players: room.players.map((p) => p.name),
-    }).catch(() => {});
-    incrementStats(user.uid, isWinner, isHost).catch(() => {});
-  }, [isLoggedIn, user]);
+      won: room.winnerId === playerId,
+      isHost: room.hostId === playerId,
+      roomCode: room.code,
+      gameKey: `${room.code}_${room.createdAt}`,
+      playerNames: room.players.map((p) => p.name),
+    }).catch((e) => console.error('[stats] flip7', e));
+  }, [user]);
 
   const isHost = room.hostId === playerId;
   const winner = room.players.find((p) => p.id === room.winnerId);

@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { ImpostorRoom } from '@/lib/types/impostor';
 import { playAgain, leaveRoom } from '@/lib/firestore/impostor';
+import { useAuth } from '@/hooks/useAuth';
+import { recordGameResult } from '@/lib/firestore/players';
 import { Button } from '@/components/ui/Button';
 
 interface Props {
@@ -19,6 +22,26 @@ const fadeUp = {
 
 export function GameOverScreen({ room, playerId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
+  const hasSaved = useRef(false);
+
+  useEffect(() => {
+    if (!user || hasSaved.current || room.winner === null) return;
+    hasSaved.current = true;
+    const isImpostor = room.impostorIds.includes(playerId);
+    const won = room.winner === 'crew' ? !isImpostor : isImpostor;
+    recordGameResult({
+      playerId: user.uid,
+      gameType: 'impostor',
+      gameName: 'impostor',
+      won,
+      isHost: room.hostId === playerId,
+      roomCode: room.code,
+      gameKey: `${room.code}_${room.createdAt}`,
+      playerNames: room.players.map((p) => p.name),
+    }).catch((e) => console.error('[stats] impostor', e));
+  }, [user, room.winner]);
+
   const isHost = room.hostId === playerId;
   const crewWon = room.winner === 'crew';
   const impostorCount = room.impostorIds.length;

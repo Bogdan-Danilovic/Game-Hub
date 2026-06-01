@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { AvalonRoom } from '@/lib/types/avalon';
 import { playAgain, leaveRoom } from '@/lib/firestore/avalon';
+import { useAuth } from '@/hooks/useAuth';
+import { recordGameResult } from '@/lib/firestore/players';
 import { Button } from '@/components/ui/Button';
 
 interface Props {
@@ -30,6 +33,26 @@ const WIN_MESSAGES: Record<string, string> = {
 
 export function GameOverScreen({ room, playerId }: Props) {
   const router = useRouter();
+  const { user } = useAuth();
+  const hasSaved = useRef(false);
+
+  useEffect(() => {
+    if (!user || hasSaved.current || room.winner === null) return;
+    hasSaved.current = true;
+    const myLoyalty = room.players.find((p) => p.id === playerId)?.loyalty;
+    const won = room.winner === 'good' ? myLoyalty === 'good' : myLoyalty === 'evil';
+    recordGameResult({
+      playerId: user.uid,
+      gameType: 'avalon',
+      gameName: 'avalon',
+      won,
+      isHost: room.hostId === playerId,
+      roomCode: room.code,
+      gameKey: `${room.code}_${room.createdAt}`,
+      playerNames: room.players.map((p) => p.name),
+    }).catch((e) => console.error('[stats] avalon', e));
+  }, [user, room.winner]);
+
   const isHost = room.hostId === playerId;
   const goodWon = room.winner === 'good';
 

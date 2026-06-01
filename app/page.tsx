@@ -1,4 +1,5 @@
 import GameGallery from '@/components/hub/GameGallery';
+import { OnlineFriends } from '@/components/hub/OnlineFriends';
 import { AdBanner } from '@/components/ads/AdBanner';
 
 export default function HubPage() {
@@ -48,6 +49,9 @@ export default function HubPage() {
       <section className="relative z-10 w-full flex-1 flex items-center justify-center pb-8">
         <GameGallery />
       </section>
+
+      {/* Online prijatelji — prikazuje se samo ako igrač ima prijatelja */}
+      <OnlineFriends />
 
       {/* Ad baner — ispod galerije, nikad tokom igre */}
       <div className="relative z-10 w-full max-w-[500px] px-4 pb-8 mx-auto">

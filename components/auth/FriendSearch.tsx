@@ -8,7 +8,7 @@ import {
   where,
   getDocs,
   doc,
-  writeBatch,
+  updateDoc,
   arrayUnion,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -71,10 +71,10 @@ export function FriendSearch() {
     setAdding(true);
     setError(null);
     try {
-      const batch = writeBatch(db);
-      batch.update(doc(db, 'users', user.uid), { friends: arrayUnion(found.uid) });
-      batch.update(doc(db, 'users', found.uid), { friends: arrayUnion(user.uid) });
-      await batch.commit();
+      // One-directional add: write only to our own document. Firestore rules
+      // allow a user to modify only `users/{their-own-uid}`, so a mutual write
+      // to the other player's doc would be denied. Friends behave like "follows".
+      await updateDoc(doc(db, 'users', user.uid), { friends: arrayUnion(found.uid) });
       setFound(null);
       setSearch('');
     } catch (e) {

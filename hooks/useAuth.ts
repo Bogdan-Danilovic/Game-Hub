@@ -3,7 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
   onAuthStateChanged,
+  signInAnonymously,
   signInWithPopup,
+  linkWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   type User as FirebaseUser,
@@ -37,14 +39,23 @@ export function useAuth(): UseAuthReturn {
       unsubscribeProfile?.();
       unsubscribeProfile = undefined;
 
-      setUser(firebaseUser);
-
-      if (!firebaseUser || firebaseUser.isAnonymous) {
+      if (!firebaseUser) {
+        // No session yet → establish a guest identity so every visitor has a
+        // stable uid for stats/presence/friends, without loosening Firestore rules.
+        setUser(null);
         setProfile(null);
-        setLoading(false);
+        signInAnonymously(auth).catch((err) => {
+          // Requires the Anonymous provider to be enabled in the Firebase console.
+          // If not enabled, guests stay signed-out and guest features degrade gracefully.
+          setError(err instanceof Error ? err.message : 'Guest sign-in failed');
+          setLoading(false);
+        });
         return;
       }
 
+      setUser(firebaseUser);
+
+      // Load the profile for BOTH guest (anonymous) and logged-in users.
       const profileRef = doc(db, 'users', firebaseUser.uid);
       unsubscribeProfile = onSnapshot(
         profileRef,
@@ -70,6 +81,20 @@ export function useAuth(): UseAuthReturn {
     setLoading(true);
     try {
       const provider = new GoogleAuthProvider();
+      const current = auth.currentUser;
+      // Upgrade a guest account in place so its stats/friends survive the sign-in.
+      if (current?.isAnonymous) {
+        try {
+          await linkWithPopup(current, provider);
+          return;
+        } catch (linkErr) {
+          const code = (linkErr as { code?: string }).code;
+          // Google account already exists → fall through to a normal sign-in.
+          if (code !== 'auth/credential-already-in-use' && code !== 'auth/email-already-in-use') {
+            throw linkErr;
+          }
+        }
+      }
       await signInWithPopup(auth, provider);
     } catch (err) {
       const e = err as { code?: string; message?: string };

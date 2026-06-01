@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { AliasRoom } from '@/lib/types/alias';
 import { playAgain, leaveRoom } from '@/lib/firestore/alias';
+import { useAuth } from '@/hooks/useAuth';
+import { recordGameResult } from '@/lib/firestore/players';
 
 interface Props {
   room: AliasRoom;
@@ -55,6 +57,23 @@ export function GameOverScreen({ room, playerId }: Props) {
 
   const playerTeam = room.players.find((p) => p.id === playerId)?.teamId;
   const isWinner = winner !== null && playerTeam === winner;
+
+  const { user } = useAuth();
+  const hasSaved = useRef(false);
+  useEffect(() => {
+    if (!user || hasSaved.current || winner === null) return;
+    hasSaved.current = true;
+    recordGameResult({
+      playerId: user.uid,
+      gameType: 'alias',
+      gameName: 'alias',
+      won: isWinner,
+      isHost: room.hostId === playerId,
+      roomCode: room.code,
+      gameKey: `${room.code}_${room.createdAt}`,
+      playerNames: room.players.map((p) => p.name),
+    }).catch((e) => console.error('[stats] alias', e));
+  }, [user, winner, isWinner]);
 
   const winnerColor = winner === 'a'
     ? { text: '#22d3ee', glow: 'rgba(8,145,178,0.5)', label: 'Tim A pobjeđuje!' }

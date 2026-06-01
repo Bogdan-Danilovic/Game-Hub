@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { AuthHeaderSlot } from '@/components/auth/AuthHeaderSlot';
 import { GuestBanner } from '@/components/auth/GuestBanner';
 import { UsernameSetup } from '@/components/auth/UsernameSetup';
+import { HubNav } from '@/components/hub/HubNav';
+import { PresenceTracker } from '@/components/presence/PresenceTracker';
 
 const spaceGrotesk = Space_Grotesk({
   variable: '--font-sans',
@@ -56,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             borderBottom: '1px solid rgba(255,255,255,0.07)',
           }}
         >
+          <HubNav />
           <span
             className="absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-wide"
             style={{ color: 'var(--text-primary)' }}
@@ -68,6 +71,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <GuestBanner />
         <UsernameSetup />
+        <PresenceTracker />
       </body>
     </html>
   );

@@ -10,6 +10,10 @@ service cloud.firestore {
     }
 
     // ── Profili ───────────────────────────────────────────────────────────
+    // Guests use Firebase Anonymous Auth, so request.auth.uid is ALWAYS present
+    // (guest or logged-in). Rules stay auth-gated — we deliberately do NOT use a
+    // public "document id == request.resource.data.id" write rule. A player may
+    // read any profile (leaderboard / friends) but write only their own document.
     match /users/{uid} {
       allow read: if true;
       allow create: if request.auth != null && request.auth.uid == uid;
