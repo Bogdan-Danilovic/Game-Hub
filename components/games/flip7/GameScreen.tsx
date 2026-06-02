@@ -6,6 +6,7 @@ import { Flip7Room } from '@/lib/types/flip7';
 import { Button } from '@/components/ui/Button';
 import { Flip7PlayerPanel } from '@/components/games/flip7/Flip7PlayerPanel';
 import { AdBanner } from '@/components/ads/AdBanner';
+import { hexA } from '@/lib/utils';
 import {
   sayJosJednu,
   sayDosta,
@@ -19,9 +20,16 @@ interface Props {
   playerId: string;
 }
 
+const ACCENT = '#f59e0b'; // Flip 7 amber identity
+
 const PENDING_COPY: Record<'stop' | 'okreni_tri', { title: string; desc: string }> = {
   stop: { title: 'Izvučen STOP', desc: 'Izaberi ko se bezbedno zaustavlja (banka poene)' },
   okreni_tri: { title: 'Izvučen OKRENI TRI', desc: 'Izaberi ko mora da okrene tri karte' },
+};
+
+const primaryBtn = {
+  background: `linear-gradient(135deg, ${ACCENT}, ${hexA(ACCENT, 0.8)})`,
+  boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
 };
 
 export function GameScreen({ room, playerId }: Props) {
@@ -52,13 +60,19 @@ export function GameScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="relative flex flex-col flex-1 h-screen-safe">
+    <div className="relative flex flex-1 flex-col h-screen-safe">
       {/* Top bar */}
-      <div className="flex-shrink-0 px-5 pt-20 pb-3">
-        <div className="flex items-center justify-between text-[11px] text-amber-200/50">
-          <span className="tracking-[0.15em] uppercase">Runda {room.roundNumber}</span>
-          <span className="tabular-nums">Cilj {room.settings.targetScore}</span>
-          <span className="tabular-nums">Špil {room.deck.length}</span>
+      <div className="flex-shrink-0 px-5 pb-3 pt-20">
+        <div className="flex items-center justify-center gap-2 text-[11px] font-semibold">
+          <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 uppercase tracking-[0.12em] text-amber-200/60">
+            Runda {room.roundNumber}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 tabular-nums text-amber-100/70">
+            Cilj {room.settings.targetScore}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-1 tabular-nums text-amber-100/70">
+            Špil {room.deck.length}
+          </span>
         </div>
         <AnimatePresence mode="wait">
           {room.lastEvent && (
@@ -68,7 +82,7 @@ export function GameScreen({ room, playerId }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="mt-2 text-[13px] text-amber-100/90 leading-snug min-h-[18px]"
+              className="mt-2.5 min-h-[18px] text-center text-[13px] leading-snug text-amber-100/90"
             >
               {room.lastEvent}
             </motion.p>
@@ -83,7 +97,7 @@ export function GameScreen({ room, playerId }: Props) {
       </div>
 
       {/* Board */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-5 pb-4 flex flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto no-scrollbar px-5 pb-4">
         {room.players.map((p) => (
           <Flip7PlayerPanel
             key={p.id}
@@ -96,7 +110,7 @@ export function GameScreen({ room, playerId }: Props) {
 
       {/* Action bar */}
       <div
-        className="flex-shrink-0 px-5 pt-3 pb-8 border-t"
+        className="flex-shrink-0 border-t px-5 pb-8 pt-3"
         style={{
           borderColor: 'rgba(255,255,255,0.06)',
           background: 'rgba(7,13,24,0.6)',
@@ -107,7 +121,7 @@ export function GameScreen({ room, playerId }: Props) {
         <AnimatePresence mode="wait">
           {canHostSkip ? (
             <motion.div key="host-skip" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-2.5">
-              <p className="text-[12px] text-amber-100/70 text-center">
+              <p className="text-center text-[12px] text-amber-100/70">
                 <span className="font-semibold text-amber-400">{blocker?.name ?? 'Igrač'}</span> nije povezan
                 {pending.type
                   ? ` — treba da reši ${pending.type === 'stop' ? 'STOP' : 'OKRENI TRI'}`
@@ -117,7 +131,8 @@ export function GameScreen({ room, playerId }: Props) {
                 fullWidth
                 disabled={busy}
                 onClick={() => run(() => hostSkipTarget(room.code, playerId))}
-                className="!bg-amber-500 !text-[#0a1626] hover:!bg-amber-400 active:!bg-amber-600"
+                className="!rounded-2xl !text-white"
+                style={primaryBtn}
               >
                 Preskoči igrača
               </Button>
@@ -125,7 +140,7 @@ export function GameScreen({ room, playerId }: Props) {
           ) : iResolve && pending.type ? (
             <motion.div key="resolve" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-3">
               <div>
-                <p className="text-[12px] font-bold text-amber-400 tracking-wide uppercase">
+                <p className="text-[12px] font-bold uppercase tracking-wide text-amber-400">
                   {PENDING_COPY[pending.type].title}
                 </p>
                 <p className="text-[12px] text-amber-100/60">{PENDING_COPY[pending.type].desc}</p>
@@ -134,6 +149,7 @@ export function GameScreen({ room, playerId }: Props) {
                 {activePlayers.map((p) => (
                   <button
                     key={p.id}
+                    type="button"
                     disabled={busy}
                     onClick={() =>
                       run(() =>
@@ -142,7 +158,7 @@ export function GameScreen({ room, playerId }: Props) {
                           : applyOkreniTri(room.code, p.id)
                       )
                     }
-                    className="min-h-[46px] px-4 py-2.5 rounded-xl text-[14px] font-semibold bg-amber-500/15 text-amber-200 border border-amber-500/30 active:bg-amber-500/30 hover:bg-amber-500/25 hover:border-amber-400 transition-colors disabled:opacity-40"
+                    className="min-h-[46px] rounded-xl border border-amber-500/30 bg-amber-500/15 px-4 py-2.5 text-[14px] font-semibold text-amber-200 transition-colors hover:border-amber-400 hover:bg-amber-500/25 active:bg-amber-500/30 disabled:opacity-40"
                   >
                     {p.id === playerId ? 'Ti' : p.name}
                   </button>
@@ -150,7 +166,7 @@ export function GameScreen({ room, playerId }: Props) {
               </div>
             </motion.div>
           ) : pending.type ? (
-            <motion.p key="wait-pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] text-amber-100/50 text-center py-3">
+            <motion.p key="wait-pending" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-3 text-center text-[13px] text-amber-100/50">
               {chooser?.name ?? 'Igrač'} bira metu za {pending.type === 'stop' ? 'STOP' : 'OKRENI TRI'}…
               {chooser && !chooser.isConnected && <span className="text-amber-100/30"> · nije povezan</span>}
             </motion.p>
@@ -160,7 +176,8 @@ export function GameScreen({ room, playerId }: Props) {
                 fullWidth
                 disabled={busy}
                 onClick={() => run(() => sayJosJednu(room.code, playerId))}
-                className="!bg-amber-500 !text-[#0a1626] hover:!bg-amber-400 active:!bg-amber-600"
+                className="!rounded-2xl !text-white"
+                style={primaryBtn}
               >
                 Još jednu
               </Button>
@@ -169,17 +186,17 @@ export function GameScreen({ room, playerId }: Props) {
                 variant="secondary"
                 disabled={busy}
                 onClick={() => run(() => sayDosta(room.code, playerId))}
-                className="!border-emerald-500/40 !text-emerald-300 hover:!border-emerald-400 hover:!text-emerald-200"
+                className="!rounded-2xl !border-emerald-500/40 !text-emerald-300 hover:!border-emerald-400 hover:!text-emerald-200"
               >
                 Dosta
               </Button>
             </motion.div>
           ) : me && me.status !== 'active' ? (
-            <motion.p key="im-out" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] text-amber-100/40 text-center py-3">
+            <motion.p key="im-out" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-3 text-center text-[13px] text-amber-100/40">
               Sačekaj kraj runde…
             </motion.p>
           ) : (
-            <motion.p key="other-turn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-3">
+            <motion.p key="other-turn" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="py-3 text-center">
               <span className="text-[12px] text-amber-100/40">Na potezu </span>
               <motion.span
                 animate={{ opacity: [0.6, 1, 0.6] }}

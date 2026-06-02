@@ -8,11 +8,14 @@ import { Button } from '@/components/ui/Button';
 import { playAgain, leaveRoom } from '@/lib/firestore/flip7';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: Flip7Room;
   playerId: string;
 }
+
+const ACCENT = '#f59e0b'; // Flip 7 amber identity
 
 export function GameOverScreen({ room, playerId }: Props) {
   const router = useRouter();
@@ -48,61 +51,80 @@ export function GameOverScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="relative flex flex-col items-center flex-1 px-6 pt-20 pb-10 h-screen-safe overflow-y-auto">
+    <div className="relative flex flex-1 flex-col items-center overflow-y-auto no-scrollbar px-5 pb-12 pt-20">
       <motion.div
-        className="fixed inset-0 pointer-events-none"
+        className="pointer-events-none fixed inset-0"
         animate={{ background: 'radial-gradient(ellipse at center, rgba(245,158,11,0.10) 0%, transparent 70%)' }}
       />
-      <div className="relative w-full max-w-[360px] my-auto flex flex-col items-center gap-8">
+      <div className="relative my-auto flex w-full max-w-[400px] flex-col items-center gap-8">
+        {/* Winner hero */}
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 150, damping: 12 }}
-          className="text-center"
+          className="w-full rounded-3xl p-6 text-center"
+          style={{
+            background: `linear-gradient(160deg, ${hexA(ACCENT, 0.28)} 0%, rgba(0,0,0,0.85) 100%)`,
+            border: `1px solid ${hexA(ACCENT, 0.25)}`,
+            boxShadow: `0 20px 60px ${hexA(ACCENT, 0.25)}`,
+          }}
         >
-          <span className="text-6xl block mb-3">🏆</span>
-          <h2 className="text-[34px] font-bold text-amber-400" style={{ textShadow: '0 0 30px rgba(245,158,11,0.45)' }}>
+          <span className="mb-3 block text-6xl">🏆</span>
+          <h2 className="text-[34px] font-extrabold tracking-[-0.5px] text-amber-400" style={{ textShadow: '0 0 30px rgba(245,158,11,0.45)' }}>
             {winner ? winner.name : 'Kraj igre'}
           </h2>
-          <p className="text-[13px] text-amber-100/60 mt-1">
+          <p className="mt-1 text-[13px] text-amber-100/70">
             {winner ? `pobeđuje sa ${winner.totalScore} poena!` : 'igra je završena'}
           </p>
         </motion.div>
 
+        {/* Final standings */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="w-full flex flex-col gap-2"
+          className="flex w-full flex-col gap-2 rounded-2xl border border-white/10 bg-white/[0.05] p-4"
         >
-          <p className="text-[10px] text-amber-200/40 tracking-[0.2em] uppercase mb-1">Konačni poredak</p>
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200/50">Konačni poredak</p>
           {ranked.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + i * 0.07 }}
-              className="flex items-center justify-between py-2.5 px-4 rounded-xl"
-              style={{ background: i === 0 ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.025)' }}
+              className="flex items-center justify-between rounded-xl px-4 py-2.5"
+              style={{
+                background: i === 0 ? hexA(ACCENT, 0.12) : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${i === 0 ? hexA(ACCENT, 0.3) : 'rgba(255,255,255,0.06)'}`,
+              }}
             >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-[13px] font-bold text-amber-200/40 tabular-nums w-4">{i + 1}</span>
-                <span className="text-[14px] text-amber-50 truncate">{p.name}</span>
-                {p.id === playerId && <span className="text-[9px] text-amber-400/70 uppercase">ti</span>}
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="w-4 text-[13px] font-bold tabular-nums text-amber-200/40">{i + 1}</span>
+                <span className="truncate text-[14px] text-amber-50">{p.name}</span>
+                {p.id === playerId && <span className="text-[9px] uppercase text-amber-400/70">ti</span>}
               </div>
-              <span className="text-[15px] font-bold text-amber-100 tabular-nums">{p.totalScore}</span>
+              <span className="text-[15px] font-bold tabular-nums text-amber-100">{p.totalScore}</span>
             </motion.div>
           ))}
         </motion.div>
 
+        {/* Actions */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
-          className="w-full flex flex-col gap-3 pt-2"
+          className="flex w-full flex-col gap-3 pt-2"
         >
           {isHost && (
-            <Button fullWidth onClick={handlePlayAgain} className="!bg-amber-500 !text-[#0a1626] hover:!bg-amber-400 active:!bg-amber-600">
+            <Button
+              fullWidth
+              onClick={handlePlayAgain}
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${hexA(ACCENT, 0.8)})`,
+                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+              }}
+            >
               Igraj ponovo
             </Button>
           )}

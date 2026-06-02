@@ -4,12 +4,15 @@ import { motion } from 'framer-motion';
 import { Flip7Player } from '@/lib/types/flip7';
 import { Flip7Card } from '@/components/games/flip7/Flip7Card';
 import { computePlayerRoundScore } from '@/lib/games/flip7/engine';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   player: Flip7Player;
   isSelf: boolean;
   focused: boolean;
 }
+
+const ACCENT = '#f59e0b'; // Flip 7 amber identity
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   exited: { label: 'STAO', color: '#34d399' },
@@ -31,11 +34,11 @@ export function Flip7PlayerPanel({ player, isSelf, focused }: Props) {
       transition={{ type: 'spring', stiffness: 360, damping: 28 }}
       className="rounded-2xl p-3"
       style={{
-        border: `1px solid ${focused ? 'rgba(245,158,11,0.55)' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${focused ? hexA(ACCENT, 0.55) : 'rgba(255,255,255,0.08)'}`,
         background: focused
-          ? 'linear-gradient(145deg, rgba(245,158,11,0.14), rgba(245,158,11,0.03))'
-          : 'rgba(255,255,255,0.025)',
-        boxShadow: focused ? '0 0 22px rgba(245,158,11,0.18)' : 'none',
+          ? `linear-gradient(145deg, ${hexA(ACCENT, 0.16)}, ${hexA(ACCENT, 0.03)})`
+          : 'rgba(255,255,255,0.04)',
+        boxShadow: focused ? `0 0 22px ${hexA(ACCENT, 0.18)}` : 'none',
       }}
     >
       <div className="flex items-center justify-between gap-2 mb-2.5">

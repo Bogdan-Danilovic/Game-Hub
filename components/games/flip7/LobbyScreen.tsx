@@ -10,6 +10,7 @@ import { updateSettings, kickPlayer, startGame, leaveRoom } from '@/lib/firestor
 import { AdBanner } from '@/components/ads/AdBanner';
 import { HostUnlockButton } from '@/components/ads/HostUnlockButton';
 import { DonationModal } from '@/components/ads/DonationModal';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: Flip7Room;
@@ -18,6 +19,13 @@ interface Props {
 
 const MIN_PLAYERS = 2;
 const TARGET_OPTIONS = [100, 150, 200, 250];
+const ACCENT = '#f59e0b'; // Flip 7 amber identity
+
+const fadeIn = (delay = 0) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+});
 
 export function LobbyScreen({ room, playerId }: Props) {
   const router = useRouter();
@@ -58,52 +66,62 @@ export function LobbyScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="relative flex flex-col flex-1 px-6 pt-20 pb-10 h-screen-safe overflow-y-auto">
-      <div className="relative w-full max-w-[360px] mx-auto flex flex-col gap-7 flex-1">
-        {/* Access code */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-          <p className="text-[10px] text-amber-200/40 tracking-[0.2em] uppercase mb-3">Pristupni kod</p>
-          <button onClick={copyCode} className="block">
+    <div className="flex flex-1 flex-col overflow-y-auto no-scrollbar">
+      <div className="mx-auto flex w-full max-w-[400px] flex-1 flex-col gap-6 px-5 pb-12 pt-20">
+        {/* Access code hero */}
+        <motion.div
+          {...fadeIn(0.05)}
+          className="rounded-3xl p-6 text-center"
+          style={{
+            background: `linear-gradient(160deg, ${hexA(ACCENT, 0.28)} 0%, rgba(0,0,0,0.85) 100%)`,
+            border: `1px solid ${hexA(ACCENT, 0.25)}`,
+            boxShadow: `0 20px 60px ${hexA(ACCENT, 0.25)}`,
+          }}
+        >
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200/50">Pristupni kod</p>
+          <button type="button" onClick={copyCode} className="mt-3 block w-full" aria-label="Kopiraj kod sobe">
             <span
-              className="text-[40px] font-bold tracking-[0.3em] text-amber-400"
-              style={{ textShadow: '0 0 22px rgba(245,158,11,0.4)' }}
+              className="text-[44px] font-extrabold tracking-[0.28em] text-amber-400"
+              style={{ textShadow: '0 0 28px rgba(245,158,11,0.45)' }}
             >
               {room.code}
             </span>
           </button>
-          <p className="text-[10px] mt-2 h-4">
+          <div className="mt-1 h-4 text-[11px]">
             <AnimatePresence mode="wait">
               {copied ? (
                 <motion.span key="c" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-emerald-400">
                   Kopirano
                 </motion.span>
               ) : (
-                <motion.span key="h" initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="text-amber-100/50">
+                <motion.span key="h" initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} className="text-amber-100/50">
                   tapni da kopiraš
                 </motion.span>
               )}
             </AnimatePresence>
-          </p>
+          </div>
         </motion.div>
 
         {/* Players */}
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-baseline justify-between mb-4">
-            <p className="text-[10px] text-amber-200/40 tracking-[0.2em] uppercase">Igrači · {playerCount}</p>
+        <motion.div {...fadeIn(0.15)} className="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
+          <div className="mb-4 flex items-baseline justify-between">
+            <span className="text-lg font-extrabold tracking-[-0.3px] text-white">
+              Igrači <span className="text-amber-400/80">{playerCount}</span>
+            </span>
             {playerCount < MIN_PLAYERS && (
-              <motion.p
+              <motion.span
                 animate={{ opacity: [0.4, 1, 0.4] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="text-[10px] text-amber-400/70"
+                className="text-[11px] font-semibold text-amber-400/70"
               >
                 čekamo još {MIN_PLAYERS - playerCount}
-              </motion.p>
+              </motion.span>
             )}
           </div>
 
-          <div className="w-full h-px bg-white/[0.05] mb-5 relative">
+          <div className="relative mb-5 h-px w-full bg-white/[0.06]">
             <motion.div
-              className={`absolute top-0 left-0 h-px ${canStart ? 'bg-emerald-500/50' : 'bg-amber-500/50'}`}
+              className={`absolute left-0 top-0 h-px ${canStart ? 'bg-emerald-500/60' : 'bg-amber-500/60'}`}
               animate={{ width: `${Math.min((playerCount / MIN_PLAYERS) * 100, 100)}%` }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             />
@@ -126,68 +144,77 @@ export function LobbyScreen({ room, playerId }: Props) {
         </motion.div>
 
         {/* Target score */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="flex flex-col gap-3">
-          <p className="text-[10px] text-amber-200/40 tracking-[0.2em] uppercase">Ciljni rezultat</p>
+        <motion.div {...fadeIn(0.25)} className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200/50">Ciljni rezultat</p>
           <div className="grid grid-cols-4 gap-2">
             {TARGET_OPTIONS.map((opt) => {
               const active = opt === targetScore;
               return (
                 <button
                   key={opt}
+                  type="button"
                   disabled={!isHost}
                   onClick={() => updateSettings(room.code, { targetScore: opt })}
                   className={`min-h-[48px] rounded-xl text-[15px] font-bold tabular-nums transition-colors ${
-                    active ? 'bg-amber-500 text-[#0a1626]' : 'bg-white/[0.04] text-amber-100/60'
-                  } ${isHost ? 'active:bg-white/[0.12] hover:bg-white/[0.08]' : 'cursor-default'}`}
-                  style={active ? { boxShadow: '0 0 16px rgba(245,158,11,0.3)' } : undefined}
+                    active ? 'text-white' : 'border border-white/10 bg-white/[0.04] text-amber-100/65'
+                  } ${isHost && !active ? 'hover:bg-white/[0.08] active:bg-white/[0.12]' : ''} ${
+                    isHost ? '' : 'cursor-default'
+                  }`}
+                  style={
+                    active
+                      ? {
+                          background: `linear-gradient(135deg, ${ACCENT}, ${hexA(ACCENT, 0.8)})`,
+                          boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+                        }
+                      : undefined
+                  }
                 >
                   {opt}
                 </button>
               );
             })}
           </div>
-          {!isHost && <p className="text-[10px] text-amber-100/30">Samo host menja podešavanja</p>}
+          {!isHost && <p className="text-[11px] text-amber-100/35">Samo host menja podešavanja</p>}
         </motion.div>
 
         {!isHost && (
           <motion.p
             animate={{ opacity: [0.3, 0.6, 0.3] }}
             transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="text-[12px] text-amber-100/40 text-center py-2"
+            className="py-1 text-center text-[12px] text-amber-100/40"
           >
             Čekamo da host započne igru...
           </motion.p>
         )}
 
         {/* TODO: zameniti slot ID — prikazuje se samo u lobby fazi */}
-        <AdBanner slot="TODO_SLOT_LOBBY" format="horizontal" className="mt-4 rounded-xl overflow-hidden" />
+        <AdBanner slot="TODO_SLOT_LOBBY" format="horizontal" className="overflow-hidden rounded-xl" />
 
-        {isHost && (
-          <div className="mt-3">
-            <HostUnlockButton roomCode={room.code} />
-          </div>
-        )}
+        {isHost && <HostUnlockButton roomCode={room.code} />}
 
-        <div className="mt-3">
-          <button
-            onClick={() => setDonationOpen(true)}
-            className="w-full py-2.5 rounded-xl text-[11px] text-slate-600 hover:text-slate-500 transition-colors cursor-pointer"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}
-          >
-            Podržite razvoj — gledaj video
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setDonationOpen(true)}
+          className="w-full rounded-xl py-2.5 text-[11px] text-amber-100/30 transition-colors hover:text-amber-100/50"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          Podržite razvoj — gledaj video
+        </button>
 
         <DonationModal isOpen={donationOpen} onClose={() => setDonationOpen(false)} />
 
         {/* Footer */}
-        <div className="mt-auto pt-6 flex flex-col gap-3">
+        <div className="mt-auto flex flex-col gap-3 pt-4">
           {isHost && (
             <Button
               fullWidth
               disabled={!canStart || starting}
               onClick={handleStart}
-              className="!bg-amber-500 !text-[#0a1626] hover:!bg-amber-400 active:!bg-amber-600"
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${hexA(ACCENT, 0.8)})`,
+                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+              }}
             >
               {starting ? 'Pokretanje...' : canStart ? 'Započni igru' : `Još ${MIN_PLAYERS - playerCount} igrača`}
             </Button>
@@ -214,7 +241,7 @@ export function LobbyScreen({ room, playerId }: Props) {
               animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
               exit={{ scale: 0.3, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="text-[140px] font-bold text-amber-400 leading-none tabular-nums"
+              className="text-[140px] font-bold leading-none tabular-nums text-amber-400"
               style={{ textShadow: '0 0 40px rgba(245,158,11,0.5)' }}
             >
               {countdown}

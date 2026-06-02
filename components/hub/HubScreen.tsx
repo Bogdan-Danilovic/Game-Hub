@@ -3,10 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useReducedMotion } from 'framer-motion';
-import { Search, ArrowRight } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { GAMES, type GameDefinition } from '@/lib/games/registry';
-import { hexA } from '@/lib/utils';
-import { GameIcon } from '@/components/GameIcon';
 import { HeroCard } from './HeroCard';
 import { MoodChip } from './MoodChip';
 import { GameRow } from './GameRow';
@@ -16,8 +14,8 @@ const HERO_INTERVAL_MS = 3500;
 
 /**
  * The "Igre" view: visual search, featured hero carousel (autoplay + dots),
- * mood filter chips, the full game list, and a floating "Ulazi" action bar.
- * Selecting a game routes to its existing page (g.path) — routing unchanged.
+ * mood filter chips, and the full game list. Tapping a game row routes straight
+ * to its existing page (g.path) — routing unchanged.
  * Assumes a parent column with px-5 horizontal padding (full-bleed via -mx-5).
  */
 export function HubScreen() {
@@ -25,7 +23,6 @@ export function HubScreen() {
   const reduce = useReducedMotion();
   const [activeMood, setActiveMood] = useState(0);
   const [heroIndex, setHeroIndex] = useState(0);
-  const [activeGame, setActiveGame] = useState<GameDefinition | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
   const featured = useMemo(() => GAMES.filter((g) => g.available).slice(0, 3), []);
@@ -104,45 +101,11 @@ export function HubScreen() {
       >
         {visible.map((g, i) => (
           <div key={g.id}>
-            <GameRow game={g} onOpen={(gm) => gm.available && setActiveGame(gm)} />
+            <GameRow game={g} onOpen={enterGame} />
             {i < visible.length - 1 && <div className="ml-[86px] h-px bg-white/[0.09]" />}
           </div>
         ))}
       </div>
-
-      {/* Floating action bar */}
-      {activeGame && (
-        <div
-          className="fixed bottom-[104px] left-1/2 z-30 flex w-[calc(100%-32px)] max-w-[398px] -translate-x-1/2 items-center gap-3 rounded-2xl py-2.5 pl-3.5 pr-2.5"
-          style={{
-            background: 'rgba(255,255,255,0.15)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.15)',
-            animation: 'gh-pop 0.2s ease both',
-          }}
-        >
-          <GameIcon game={activeGame} size={44} />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-white">{activeGame.name}</div>
-            <div className="truncate text-xs text-white/55">
-              {activeGame.minPlayers}–{activeGame.maxPlayers} igrača · {activeGame.avgDuration}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => enterGame(activeGame)}
-            className="flex shrink-0 items-center gap-1.5 rounded-full px-[18px] py-2.5 text-sm font-bold text-white"
-            style={{
-              background: `linear-gradient(135deg, ${activeGame.accentColor}, ${hexA(activeGame.accentColor, 0.8)})`,
-              boxShadow: `0 4px 16px ${hexA(activeGame.accentColor, 0.4)}`,
-            }}
-          >
-            Ulazi
-            <ArrowRight size={15} strokeWidth={2.5} />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
