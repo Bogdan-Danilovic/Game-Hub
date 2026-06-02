@@ -5,6 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/**
+ * Converts a hex color (#rrggbb) into an rgba() string with the given alpha.
+ * Used for dynamic per-game accent gradients, glows, and borders in the Hub UI.
+ */
+export function hexA(hex: string, alpha: number): string {
+  const h = hex.replace('#', '')
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 const CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 function secureRandom(max: number): number {

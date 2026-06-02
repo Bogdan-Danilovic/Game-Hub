@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ImpostorRoom, Category, GameMode } from '@/lib/types/impostor';
 import { CATEGORIES } from '@/lib/prompts/index';
 import { Button } from '@/components/ui/Button';
-import { PlayerCard } from '@/components/ui/PlayerCard';
+import { LobbyPlayerList } from '@/components/shared/LobbyPlayerList';
+import { CountdownTimer } from '@/components/shared/CountdownTimer';
 import { updateRoomSettings, kickPlayer, startGame } from '@/lib/firestore/impostor';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { HostUnlockButton } from '@/components/ads/HostUnlockButton';
@@ -48,12 +49,6 @@ export function LobbyScreen({ room, playerId }: Props) {
   const maxImpostors = Math.max(1, Math.floor(playerCount / 3));
   const showImpostorSettings = playerCount >= 5;
 
-  useEffect(() => {
-    if (countdown === null) return;
-    if (countdown <= 0) { startGame(room.code); return; }
-    const t = setTimeout(() => setCountdown(countdown - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown, room.code]);
 
   const handleStart = useCallback(() => { setStarting(true); setCountdown(3); }, []);
 
@@ -106,17 +101,13 @@ export function LobbyScreen({ room, playerId }: Props) {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-2.5">
-            <AnimatePresence mode="popLayout">
-              {room.players.map(p => (
-                <PlayerCard key={p.id} player={p}
-                  isHost={p.id === room.hostId} isSelf={p.id === playerId}
-                  canKick={isHost && room.status === 'lobby'}
-                  onKick={() => kickPlayer(room.code, p.id)}
-                  variant="grid" />
-              ))}
-            </AnimatePresence>
-          </div>
+          <LobbyPlayerList
+            players={room.players}
+            selfId={playerId}
+            hostId={room.hostId}
+            canKick={isHost && room.status === 'lobby'}
+            onKick={(id) => kickPlayer(room.code, id)}
+          />
         </motion.div>
 
         {/* Host settings */}
@@ -245,19 +236,12 @@ export function LobbyScreen({ room, playerId }: Props) {
       </div>
 
       <AnimatePresence>
-        {countdown !== null && countdown > 0 && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ background: 'rgba(8,11,20,0.95)' }}>
-            <motion.span key={countdown}
-              initial={{ scale: 4, opacity: 0, filter: 'blur(10px)' }}
-              animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-              exit={{ scale: 0.3, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-              className="text-[140px] font-bold text-violet-400 text-glow-v leading-none tabular-nums">
-              {countdown}
-            </motion.span>
-          </motion.div>
+        {countdown !== null && (
+          <CountdownTimer
+            seconds={countdown}
+            onEnd={() => { startGame(room.code); setCountdown(null); }}
+            accentColor="#a78bfa"
+          />
         )}
       </AnimatePresence>
     </div>

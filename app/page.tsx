@@ -1,63 +1,51 @@
-import GameGallery from '@/components/hub/GameGallery';
-import { OnlineFriends } from '@/components/hub/OnlineFriends';
+import { HubTabs } from '@/components/hub/HubTabs';
+import { HubBottomNav } from '@/components/hub/HubBottomNav';
 import { AdBanner } from '@/components/ads/AdBanner';
 
 export default function HubPage() {
   return (
-    <main className="relative flex flex-col items-center min-h-dvh overflow-x-hidden">
-      {/* Background: grid pattern + breathing orbs */}
-      <div aria-hidden className="fixed inset-0 -z-10 bg-grid" />
-      <div
-        aria-hidden
-        className="breathing-orb"
-        style={{
-          width: 680,
-          height: 680,
-          top: '-15%',
-          left: '-12%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.45), transparent 70%)',
-        }}
-      />
-      <div
-        aria-hidden
-        className="breathing-orb"
-        style={{
-          width: 520,
-          height: 520,
-          bottom: '-12%',
-          right: '-12%',
-          background: 'radial-gradient(circle, rgba(8,145,178,0.40), transparent 70%)',
-          animationDelay: '3s',
-        }}
-      />
-
-      {/* Heading */}
-      <header className="relative z-10 text-center pt-28 pb-10 px-4">
-        <h1
-          data-text="Izaberi igru"
-          className="glitch-hover text-glow-v"
-          style={{ fontWeight: 700, fontSize: 32, color: '#f1f5f9', letterSpacing: '-0.02em' }}
-        >
-          Izaberi igru
-        </h1>
-        <p className="text-sm mt-2 tracking-wide" style={{ color: '#94a3b8' }}>
-          Tvoj hub za društvene igre
-        </p>
-      </header>
-
-      {/* Gallery */}
-      <section className="relative z-10 w-full flex-1 flex items-center justify-center pb-8">
-        <GameGallery />
-      </section>
-
-      {/* Online prijatelji — prikazuje se samo ako igrač ima prijatelja */}
-      <OnlineFriends />
-
-      {/* Ad baner — ispod galerije, nikad tokom igre */}
-      <div className="relative z-10 w-full max-w-[500px] px-4 pb-8 mx-auto">
-        {/* TODO: zameniti slot ID iz AdSense dashboarda */}
-        <AdBanner slot="TODO_SLOT_HUB" format="horizontal" />
+    <main className="relative min-h-dvh overflow-x-hidden">
+      {/* Background: soft radial accent orbs (constrained to the hub column) */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-0 mx-auto max-w-[480px] overflow-hidden">
+        <div
+          className="absolute rounded-full"
+          style={{
+            top: -200,
+            left: -100,
+            width: 500,
+            height: 500,
+            background: 'radial-gradient(circle, rgba(139,92,246,0.13) 0%, transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute rounded-full"
+          style={{
+            top: 300,
+            right: -200,
+            width: 400,
+            height: 400,
+            background: 'radial-gradient(circle, rgba(8,145,178,0.13) 0%, transparent 70%)',
+          }}
+        />
       </div>
+
+      {/* Hub column — sits below the global header from layout.tsx */}
+      <div className="relative z-10 mx-auto w-full max-w-[480px] px-5 pb-40 pt-24">
+        <header className="mb-7">
+          <p className="text-[13px] font-medium text-white/45">Tvoj hub za društvene igre</p>
+        </header>
+
+        <HubTabs />
+
+        {/* Ad baner — ispod galerije, nikad tokom igre */}
+        <div className="mt-8">
+          {/* TODO: zameniti slot ID iz AdSense dashboarda */}
+          <AdBanner slot="TODO_SLOT_HUB" format="horizontal" />
+        </div>
+      </div>
+
+      {/* Bottom navigation (visual) */}
+      <HubBottomNav />
     </main>
   );
 }
