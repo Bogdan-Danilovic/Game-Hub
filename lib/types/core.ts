@@ -1,4 +1,4 @@
-export type GameType = 'impostor' | 'alias' | 'trivia' | 'avalon' | 'flip7';
+export type GameType = 'impostor' | 'alias' | 'trivia' | 'avalon' | 'flip7' | 'drawing';
 
 export type RoomStatus =
   | 'lobby'
@@ -19,7 +19,10 @@ export type RoomStatus =
   | 'voteResult'
   | 'questPhase'
   | 'questResult'
-  | 'assassinate';
+  | 'assassinate'
+  | 'word-selection'
+  | 'drawing'
+  | 'round-results';
 
 export interface BasePlayer {
   id: string;
