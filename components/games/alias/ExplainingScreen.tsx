@@ -53,9 +53,10 @@ export function ExplainingScreen({ room, playerId }: Props) {
   const urgent = timeLeft <= 10;
 
   useEffect(() => {
-    if (!room.roundEndTime) return;
+    if (!room.roundStartedAt) return;
+    const endTime = room.roundStartedAt.toMillis() + room.settings.roundDuration * 1000;
     const tick = () => {
-      const remaining = Math.max(0, Math.ceil((room.roundEndTime! - Date.now()) / 1000));
+      const remaining = Math.max(0, Math.ceil((endTime - Date.now()) / 1000));
       setTimeLeft(remaining);
       if (remaining <= 0) {
         if (isExplainer) endRound(room.code);
@@ -65,7 +66,7 @@ export function ExplainingScreen({ room, playerId }: Props) {
     };
     const raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [room.roundEndTime, room.code, isExplainer]);
+  }, [room.roundStartedAt, room.settings.roundDuration, room.code, isExplainer]);
 
   const handleCorrect = useCallback(() => {
     if (!isExplainer) return;

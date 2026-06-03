@@ -19,7 +19,7 @@ import { roomRef, subscribeToRoom } from './core';
 export { subscribeToRoom };
 
 const MAX_PLAYERS = 18;
-const MIN_PLAYERS = 3;
+const MIN_PLAYERS = 2;
 const DEFAULT_TARGET = 200;
 
 function newPlayer(id: string, name: string): Flip7Player {
@@ -54,6 +54,7 @@ function newRoom(code: string, hostId: string, player: Flip7Player): Flip7Room {
     lastEvent: null,
     roundNumber: 0,
     createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
   };
 }
 

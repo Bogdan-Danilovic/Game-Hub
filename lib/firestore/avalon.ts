@@ -55,6 +55,7 @@ function newRoom(code: string, hostId: string, player: AvalonPlayer): AvalonRoom
     winReason: null,
     lady: { enabled: false, currentHolder: null, usedByPlayers: [], history: [] },
     createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
   };
 }
 

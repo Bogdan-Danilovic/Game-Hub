@@ -1,7 +1,7 @@
 'use client';
 
 import { AliasRoom } from '@/lib/types/alias';
-import { use, useEffect, useRef } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useRoom } from '@/hooks/useRoom';
 import { usePlayer } from '@/hooks/usePlayer';
@@ -12,6 +12,7 @@ import { RoundEndScreen } from '@/components/games/alias/RoundEndScreen';
 import { ScoreboardScreen } from '@/components/games/alias/ScoreboardScreen';
 import { GameOverScreen } from '@/components/games/alias/GameOverScreen';
 import { rejoinRoom, setPlayerDisconnected } from '@/lib/firestore/alias';
+import { usePresence } from '@/hooks/usePresence';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export default function RoomPage({ params }: { params: Promise<{ code: string }> }) {
@@ -19,24 +20,8 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
   const router = useRouter();
   const { room, loading, error } = useRoom<AliasRoom>(code);
   const player = usePlayer();
-  const hasRejoined = useRef(false);
 
-  useEffect(() => {
-    if (!player.id || !room || hasRejoined.current) return;
-    const playerInRoom = room.players.find((p) => p.id === player.id);
-    if (playerInRoom && !playerInRoom.isConnected) {
-      hasRejoined.current = true;
-      rejoinRoom(code, player.id);
-    }
-  }, [player.id, room, code]);
-
-  useEffect(() => {
-    if (!player.id) return;
-    const pid = player.id;
-    const handleBeforeUnload = () => setPlayerDisconnected(code, pid);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [player.id, code]);
+  usePresence(code, player.id, setPlayerDisconnected, rejoinRoom);
 
   if (loading) {
     return (

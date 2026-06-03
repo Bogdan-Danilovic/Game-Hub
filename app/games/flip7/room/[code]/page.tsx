@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useRef } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { Flip7Room } from '@/lib/types/flip7';
 import { useRoom } from '@/hooks/useRoom';
@@ -11,33 +11,15 @@ import { GameScreen } from '@/components/games/flip7/GameScreen';
 import { RoundEndScreen } from '@/components/games/flip7/RoundEndScreen';
 import { GameOverScreen } from '@/components/games/flip7/GameOverScreen';
 import { rejoinRoom, setPlayerDisconnected } from '@/lib/firestore/flip7';
+import { usePresence } from '@/hooks/usePresence';
 
 export default function RoomPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params);
   const router = useRouter();
   const { room, loading, error } = useRoom<Flip7Room>(code);
   const player = usePlayer();
-  const hasRejoined = useRef(false);
 
-  useEffect(() => {
-    if (!player.id || !room || hasRejoined.current) return;
-
-    const playerInRoom = room.players.find((p) => p.id === player.id);
-    if (playerInRoom && !playerInRoom.isConnected) {
-      hasRejoined.current = true;
-      rejoinRoom(code, player.id);
-    }
-  }, [player.id, room, code]);
-
-  useEffect(() => {
-    if (!player.id) return;
-    const pid = player.id;
-
-    const handleBeforeUnload = () => setPlayerDisconnected(code, pid);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [player.id, code]);
+  usePresence(code, player.id, setPlayerDisconnected, rejoinRoom);
 
   if (loading) {
     return (

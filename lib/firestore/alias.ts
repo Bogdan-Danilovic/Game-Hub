@@ -5,6 +5,7 @@ import {
   setDoc,
   updateDoc,
   runTransaction,
+  serverTimestamp,
   Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -30,8 +31,9 @@ function newRoom(code: string, hostId: string, player: AliasPlayer): AliasRoom {
     wordsQueue: [],
     roundResults: [],
     round: 1,
-    roundEndTime: null,
+    roundStartedAt: null,
     createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
   };
 }
 
@@ -181,7 +183,7 @@ export async function startGame(code: string): Promise<void> {
       wordsQueue: words,
       roundResults: [],
       round: 1,
-      roundEndTime: null,
+      roundStartedAt: null,
     });
   });
 }
@@ -201,7 +203,7 @@ export async function advanceToExplaining(code: string): Promise<void> {
       currentWord: word,
       wordsQueue: queue,
       roundResults: [],
-      roundEndTime: Date.now() + room.settings.roundDuration * 1000,
+      roundStartedAt: serverTimestamp() as unknown as { toMillis(): number },
     });
   });
 }
@@ -274,7 +276,7 @@ export async function endRound(code: string): Promise<void> {
   await updateDoc(roomRef(code), {
     status: 'roundEnd',
     currentWord: null,
-    roundEndTime: null,
+    roundStartedAt: null,
   });
 }
 
@@ -321,7 +323,7 @@ export async function nextRound(code: string): Promise<void> {
       wordsQueue: words,
       roundResults: [],
       round: room.round + 1,
-      roundEndTime: null,
+      roundStartedAt: null,
     });
   });
 }
@@ -344,7 +346,7 @@ export async function playAgain(code: string): Promise<void> {
       wordsQueue: [],
       roundResults: [],
       round: 1,
-      roundEndTime: null,
+      roundStartedAt: null,
     });
   });
 }

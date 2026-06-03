@@ -31,6 +31,7 @@ function newRoom(code: string, hostId: string, player: ImpostorPlayer): Impostor
     winner: null,
     round: 1,
     createdAt: Date.now(),
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
   };
 }
 
@@ -186,7 +187,15 @@ export async function castVote(
   voterId: string,
   votedForId: string
 ): Promise<void> {
-  await updateDoc(roomRef(code), { [`votes.${voterId}`]: votedForId });
+  const ref = roomRef(code);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+    const room = snap.data() as ImpostorRoom;
+    if (room.status !== 'voting') return;
+    if (room.votes[voterId]) return;
+    tx.update(ref, { [`votes.${voterId}`]: votedForId });
+  });
 }
 
 export async function processVotes(

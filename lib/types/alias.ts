@@ -2,7 +2,8 @@ import { BasePlayer, BaseRoom, GameSettings } from './core';
 
 export type { RoomStatus } from './core';
 
-export interface AliasPlayer extends BasePlayer {  teamId: 'a' | 'b' | null;
+export interface AliasPlayer extends BasePlayer {
+  teamId: 'a' | 'b' | null;
 }
 
 export interface AliasSettings extends GameSettings {
@@ -24,7 +25,8 @@ export interface WordResult {
 }
 
 export interface AliasRoom extends BaseRoom {
-  gameType: 'alias';  players: AliasPlayer[];
+  gameType: 'alias';
+  players: AliasPlayer[];
   settings: AliasSettings;
   teams: { a: string[]; b: string[] };
   scores: { a: number; b: number };
@@ -34,4 +36,5 @@ export interface AliasRoom extends BaseRoom {
   wordsQueue: string[];
   roundResults: WordResult[];
   round: number;
-  roundEndTime: number | null;}
+  roundStartedAt: { toMillis(): number } | null;
+}
