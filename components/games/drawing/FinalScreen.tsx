@@ -9,12 +9,14 @@ import { Button } from '@/components/ui/Button';
 import { hexA } from '@/lib/utils';
 
 const ACCENT = '#f59e0b';
-const ACCENT2 = '#fbbf24';
 
-interface Props {
-  room: DrawingRoom;
-  playerId: string;
-}
+const fadeIn = (delay = 0) => ({
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+});
+
+interface Props { room: DrawingRoom; playerId: string; }
 
 export function FinalScreen({ room, playerId }: Props) {
   const router = useRouter();
@@ -33,114 +35,90 @@ export function FinalScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="flex flex-col flex-1 px-5 py-8 h-screen-safe overflow-y-auto">
-      <div className="w-full max-w-[400px] mx-auto flex flex-col gap-8">
-        {/* Winner banner */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="text-center"
-        >
-          <div className="text-6xl mb-4">
+    <div className="flex flex-1 flex-col overflow-y-auto no-scrollbar">
+      <div className="mx-auto flex w-full max-w-[400px] flex-col gap-6 px-5 pb-14 pt-14">
+
+        {/* Winner hero */}
+        <motion.div {...fadeIn(0.05)}
+          className="rounded-3xl p-6 text-center"
+          style={{
+            background: `linear-gradient(160deg, ${hexA(ACCENT, 0.28)} 0%, rgba(0,0,0,0.85) 100%)`,
+            border: `1px solid ${hexA(ACCENT, 0.25)}`,
+            boxShadow: `0 20px 60px ${hexA(ACCENT, 0.25)}`,
+          }}>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+            className="text-[64px] mb-3">
             {isSelfWinner ? '🏆' : '🎨'}
-          </div>
-          <h1 className="text-[28px] font-bold text-white mb-2">
+          </motion.div>
+          <h1 className="text-[26px] font-extrabold tracking-[-0.5px] text-white">
             {isSelfWinner ? 'Pobijedio si!' : `${winner?.name ?? ''} pobijedio!`}
           </h1>
-          <p className="text-[13px] text-white/40">
-            {room.scores[winner?.id] ?? 0} bodova
+          <p className="mt-1 text-[14px]" style={{ color: hexA(ACCENT, 0.8) }}>
+            {room.scores[winner?.id ?? ''] ?? 0} bodova
           </p>
         </motion.div>
 
         {/* Final scoreboard */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex flex-col gap-2"
-        >
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-1">
-            Konačni rezultati
-          </p>
+        <motion.div {...fadeIn(0.2)} className="rounded-2xl border border-white/10 bg-white/[0.05] p-5">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.25em] text-amber-200/50">Konačni rezultati</p>
+          <div className="flex flex-col gap-2">
+            {sortedPlayers.map((player, i) => {
+              const score = room.scores[player.id] ?? 0;
+              const isSelf = player.id === playerId;
+              const isWinner = i === 0;
+              const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null;
 
-          {sortedPlayers.map((player, i) => {
-            const score = room.scores[player.id] ?? 0;
-            const isSelf = player.id === playerId;
-            const isWinner = i === 0;
-
-            return (
-              <motion.div
-                key={player.id}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.15 + i * 0.07 }}
-                className="flex items-center gap-4 px-4 py-4 rounded-2xl"
-                style={{
-                  background: isWinner
-                    ? `linear-gradient(135deg, ${hexA(ACCENT, 0.12)}, ${hexA(ACCENT2, 0.06)})`
-                    : isSelf
-                    ? 'rgba(255,255,255,0.04)'
-                    : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${isWinner ? 'rgba(245,158,11,0.3)' : isSelf ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)'}`,
-                }}
-              >
-                <span
-                  className="text-[16px] font-bold w-7 text-center"
-                  style={{ color: isWinner ? ACCENT : '#475569' }}
-                >
-                  {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`}
-                </span>
-                <span className="flex-1 text-[14px] font-medium text-white/80">
-                  {player.name}
-                  {isSelf && <span className="text-amber-400/60 ml-1.5 text-[11px]">(ti)</span>}
-                </span>
-                <span
-                  className="text-[18px] font-bold"
-                  style={{ color: isWinner ? ACCENT : '#64748b' }}
-                >
-                  {score}
-                </span>
-              </motion.div>
-            );
-          })}
+              return (
+                <motion.div key={player.id}
+                  initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25 + i * 0.07 }}
+                  className="flex items-center gap-3 rounded-2xl px-4 py-3.5"
+                  style={{
+                    background: isWinner
+                      ? `linear-gradient(135deg, ${hexA(ACCENT, 0.12)}, ${hexA('#fbbf24', 0.06)})`
+                      : isSelf ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${isWinner ? hexA(ACCENT, 0.28) : isSelf ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.04)'}`,
+                  }}>
+                  <span className="w-7 text-center text-[15px]">
+                    {medal ?? <span className="text-[13px] font-bold text-white/25">{i + 1}</span>}
+                  </span>
+                  <span className="flex-1 text-[14px] font-medium text-white/80 truncate">
+                    {player.name}
+                    {isSelf && <span className="ml-1.5 text-[11px] text-amber-400/60">(ti)</span>}
+                  </span>
+                  <span className="text-[18px] font-extrabold"
+                    style={{ color: isWinner ? ACCENT : 'rgba(255,255,255,0.4)' }}>
+                    {score}
+                  </span>
+                </motion.div>
+              );
+            })}
+          </div>
         </motion.div>
 
         {/* Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="flex flex-col gap-3"
-        >
+        <motion.div {...fadeIn(0.45)} className="flex flex-col gap-3">
           {isHost && (
-            <Button
-              fullWidth
-              disabled={restarting}
-              onClick={handlePlayAgain}
+            <Button fullWidth disabled={restarting} onClick={handlePlayAgain}
               className="!rounded-2xl !text-black font-bold"
-              style={{
-                background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
-                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
-              }}
-            >
+              style={{ background: `linear-gradient(135deg, ${ACCENT}, #fbbf24)`, boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}` }}>
               {restarting ? 'Restart...' : 'Igraj ponovo'}
             </Button>
           )}
-
           {!isHost && (
-            <p className="text-[12px] text-white/30 text-center py-2">
+            <p className="py-2 text-center text-[12px] text-white/30">
               Čekamo host da ponovo pokrene...
             </p>
           )}
-
-          <button
-            onClick={() => router.push('/')}
-            className="text-[12px] text-slate-600 hover:text-slate-400 transition-colors py-2 cursor-pointer text-center"
-          >
+          <Button variant="ghost" fullWidth onClick={() => router.push('/')}
+            className="!text-amber-100/40 hover:!text-amber-100/70">
             Nazad na Hub
-          </button>
+          </Button>
         </motion.div>
+
       </div>
     </div>
   );
