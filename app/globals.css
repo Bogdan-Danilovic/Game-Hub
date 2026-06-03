@@ -387,6 +387,13 @@ body {
   }
 }
 
+/* — Bento bob animation — */
+@keyframes gh-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.gh-bob { animation: gh-bob 2.8s ease-in-out infinite; }
+
 /* — Game Hub v2 design (gamehub-final-v2) — */
 @keyframes gh-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }

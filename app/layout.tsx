@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk } from 'next/font/google';
+import { Space_Grotesk, Chakra_Petch } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { AuthHeaderSlot } from '@/components/auth/AuthHeaderSlot';
@@ -14,6 +14,12 @@ const spaceGrotesk = Space_Grotesk({
   variable: '--font-sans',
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700'],
+});
+
+const chakraPetch = Chakra_Petch({
+  variable: '--font-heading',
+  subsets: ['latin'],
+  weight: ['600', '700'],
 });
 
 export const metadata: Metadata = {
@@ -41,7 +47,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sr" className={cn('h-full antialiased', spaceGrotesk.variable, 'font-sans')}>
+    <html lang="sr" className={cn('h-full antialiased', spaceGrotesk.variable, chakraPetch.variable, 'font-sans')}>
       <head>
         <script
           async
@@ -54,20 +60,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         style={{ background: 'var(--bg-base)', color: 'var(--text-primary)' }}
       >
         <header
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-end px-5 h-14"
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 h-14"
           style={{
-            background: '#0f1219',
+            background: 'rgba(8,11,20,0.92)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
           }}
         >
-          <HubNav />
           <span
-            className="absolute left-1/2 -translate-x-1/2 text-sm font-bold tracking-wide"
-            style={{ color: 'var(--text-primary)' }}
+            className="text-[18px] font-bold tracking-tight leading-none"
+            style={{ fontFamily: 'var(--font-heading)' }}
           >
-            GameHub
+            <span style={{ color: '#8b5cf6' }}>GAME</span>
+            <span style={{ color: '#fff' }}> HUB</span>
           </span>
-          <AuthHeaderSlot />
+          <div className="flex items-center gap-1">
+            <HubNav />
+            <AuthHeaderSlot />
+          </div>
         </header>
 
         {children}
