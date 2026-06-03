@@ -14,6 +14,9 @@ import { DonationModal } from '@/components/ads/DonationModal';
 
 interface Props { room: ImpostorRoom; playerId: string; }
 
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
+
 const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
 const MODE_LABELS: Record<GameMode, string> = { sentences: 'Rečenice', concepts: 'Pojmovi' };
 
@@ -29,7 +32,7 @@ function DecryptCode({ code }: { code: string }) {
     <span className="inline-flex tracking-[0.4em]">
       {code.split('').map((char, i) => (
         <motion.span key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className={i < revealed ? 'text-violet-400' : 'text-slate-600'}>
+          className={i < revealed ? 'text-red-400' : 'text-slate-600'}>
           {i < revealed ? char : chars[Math.floor(Math.random() * chars.length)]}
         </motion.span>
       ))}
@@ -49,7 +52,6 @@ export function LobbyScreen({ room, playerId }: Props) {
   const maxImpostors = Math.max(1, Math.floor(playerCount / 3));
   const showImpostorSettings = playerCount >= 5;
 
-
   const handleStart = useCallback(() => { setStarting(true); setCountdown(3); }, []);
 
   function copyCode() {
@@ -63,25 +65,30 @@ export function LobbyScreen({ room, playerId }: Props) {
       style={{ background: 'var(--bg-base)' }}>
       <div className="w-full max-w-[400px] mx-auto flex flex-col gap-7 flex-1">
 
-        {/* Room code */}
+        {/* Room code — glass card */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-2">Pristupni kod</p>
-          <button onClick={copyCode} className="block cursor-pointer">
-            <span className="text-[36px] font-bold text-glow-v">
-              <DecryptCode code={room.code} />
-            </span>
-          </button>
-          <div className="h-4 mt-1">
-            <AnimatePresence mode="wait">
-              {copied
-                ? <motion.span key="c" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-[10px] text-emerald-400">Kopirano</motion.span>
-                : <motion.span key="h" initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="text-[10px] text-slate-500">tapni da kopiraš</motion.span>
-              }
-            </AnimatePresence>
+          <div
+            className="rounded-2xl border border-white/10 bg-white/[0.05] p-5"
+            style={{ backdropFilter: 'blur(12px)' }}
+          >
+            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-2">Pristupni kod</p>
+            <button onClick={copyCode} className="block cursor-pointer">
+              <span className="text-[36px] font-bold">
+                <DecryptCode code={room.code} />
+              </span>
+            </button>
+            <div className="h-4 mt-1">
+              <AnimatePresence mode="wait">
+                {copied
+                  ? <motion.span key="c" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-[10px] text-emerald-400">Kopirano</motion.span>
+                  : <motion.span key="h" initial={{ opacity: 0 }} animate={{ opacity: 0.4 }} exit={{ opacity: 0 }} className="text-[10px] text-slate-500">tapni da kopiraš</motion.span>
+                }
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
 
-        {/* Players — 3-col grid */}
+        {/* Players */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">Agenti · {playerCount}</p>
@@ -125,10 +132,10 @@ export function LobbyScreen({ room, playerId }: Props) {
                     <button key={mode} onClick={() => updateRoomSettings(room.code, { gameMode: mode })}
                       className="flex-1 py-2.5 rounded-xl text-[12px] font-semibold transition-all duration-200 cursor-pointer"
                       style={{
-                        background: active ? 'linear-gradient(135deg, #7c3aed, #8b5cf6)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${active ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.06)'}`,
+                        background: active ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})` : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${active ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.06)'}`,
                         color: active ? '#fff' : '#64748b',
-                        boxShadow: active ? '0 0 16px rgba(139,92,246,0.35)' : 'none',
+                        boxShadow: active ? '0 0 16px rgba(220,38,38,0.35)' : 'none',
                       }}>
                       {MODE_LABELS[mode]}
                     </button>
@@ -147,10 +154,10 @@ export function LobbyScreen({ room, playerId }: Props) {
                     <button key={cat} onClick={() => updateRoomSettings(room.code, { category: cat })}
                       className="px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all duration-200 cursor-pointer"
                       style={{
-                        background: active ? 'linear-gradient(135deg, rgba(124,58,237,0.7), rgba(139,92,246,0.5))' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${active ? 'rgba(139,92,246,0.45)' : 'rgba(255,255,255,0.05)'}`,
-                        color: active ? '#e9d5ff' : '#475569',
-                        boxShadow: active ? '0 0 10px rgba(139,92,246,0.25)' : 'none',
+                        background: active ? 'linear-gradient(135deg, rgba(220,38,38,0.7), rgba(239,68,68,0.5))' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${active ? 'rgba(220,38,38,0.45)' : 'rgba(255,255,255,0.05)'}`,
+                        color: active ? '#fca5a5' : '#475569',
+                        boxShadow: active ? '0 0 10px rgba(220,38,38,0.25)' : 'none',
                       }}>
                       {CATEGORIES[cat].label}
                     </button>
@@ -171,10 +178,10 @@ export function LobbyScreen({ room, playerId }: Props) {
                         onClick={() => updateRoomSettings(room.code, { settings: { impostorCount: n } })}
                         className="w-10 h-10 rounded-xl text-[13px] font-bold transition-all duration-200 cursor-pointer"
                         style={{
-                          background: active ? 'linear-gradient(135deg, #7c3aed, #8b5cf6)' : 'rgba(255,255,255,0.03)',
-                          border: `1px solid ${active ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.06)'}`,
+                          background: active ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})` : 'rgba(255,255,255,0.03)',
+                          border: `1px solid ${active ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.06)'}`,
                           color: active ? '#fff' : '#475569',
-                          boxShadow: active ? '0 0 12px rgba(139,92,246,0.3)' : 'none',
+                          boxShadow: active ? '0 0 12px rgba(220,38,38,0.3)' : 'none',
                         }}>
                         {n}
                       </button>
@@ -190,7 +197,7 @@ export function LobbyScreen({ room, playerId }: Props) {
                 className="flex items-center justify-between py-3 text-[12px] cursor-pointer">
                 <span className="text-slate-400">Otkrij ulogu pri glasanju</span>
                 <div className="w-8 h-[18px] rounded-full transition-colors duration-200 relative"
-                  style={{ background: room.settings.revealOnVote ? '#7c3aed' : 'rgba(255,255,255,0.06)' }}>
+                  style={{ background: room.settings.revealOnVote ? ACCENT : 'rgba(255,255,255,0.06)' }}>
                   <div className={`absolute top-[3px] w-3 h-3 rounded-full bg-white transition-transform duration-200 ${room.settings.revealOnVote ? 'translate-x-[14px]' : 'translate-x-[3px]'}`} />
                 </div>
               </button>
@@ -205,7 +212,6 @@ export function LobbyScreen({ room, playerId }: Props) {
           </motion.p>
         )}
 
-        {/* TODO: zameniti slot ID — prikazuje se samo u lobby fazi */}
         <AdBanner slot="TODO_SLOT_LOBBY" format="horizontal" className="mt-4 rounded-xl overflow-hidden" />
 
         {isHost && (
@@ -228,7 +234,16 @@ export function LobbyScreen({ room, playerId }: Props) {
 
         <div className="mt-auto pt-4">
           {isHost && (
-            <Button fullWidth disabled={!canStart || starting} onClick={handleStart}>
+            <Button
+              fullWidth
+              disabled={!canStart || starting}
+              onClick={handleStart}
+              className="!rounded-2xl !text-white"
+              style={{
+                background: canStart ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})` : undefined,
+                boxShadow: canStart ? '0 4px 16px rgba(220,38,38,0.4)' : undefined,
+              }}
+            >
               {starting ? 'Pokretanje...' : canStart ? 'Započni misiju' : `Još ${3 - playerCount} agenta`}
             </Button>
           )}
@@ -240,7 +255,7 @@ export function LobbyScreen({ room, playerId }: Props) {
           <CountdownTimer
             seconds={countdown}
             onEnd={() => { startGame(room.code); setCountdown(null); }}
-            accentColor="#a78bfa"
+            accentColor={ACCENT}
           />
         )}
       </AnimatePresence>

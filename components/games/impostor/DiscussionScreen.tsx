@@ -11,6 +11,9 @@ interface Props {
   playerId: string;
 }
 
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
+
 export function DiscussionScreen({ room, playerId }: Props) {
   const [showPrompt, setShowPrompt] = useState(false);
   const [timer, setTimer] = useState<number | null>(null);
@@ -46,7 +49,8 @@ export function DiscussionScreen({ room, playerId }: Props) {
         {isHost && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3">
             {timer !== null && (
-              <span className={`text-[32px] font-bold tabular-nums tracking-tight ${timer <= 10 ? 'text-red-400 text-glow-d' : 'text-white'}`}>
+              <span className={`text-[32px] font-bold tabular-nums tracking-tight ${timer <= 10 ? 'text-red-400' : 'text-white'}`}
+                style={timer <= 10 ? { textShadow: '0 0 12px rgba(239,68,68,0.4)' } : undefined}>
                 {fmt(timer)}
               </span>
             )}
@@ -73,7 +77,7 @@ export function DiscussionScreen({ room, playerId }: Props) {
             ${showPrompt
               ? isImpostor
                 ? 'bg-red-500/[0.04]'
-                : 'bg-violet-500/[0.04]'
+                : 'bg-emerald-500/[0.04]'
               : 'bg-white/[0.02]'
             }
           `}
@@ -104,8 +108,8 @@ export function DiscussionScreen({ room, playerId }: Props) {
                 transition={{ delay: 0.2 + i * 0.04, type: 'spring' as const, stiffness: 300, damping: 24 }}
                 className="flex items-center gap-3 py-2"
               >
-                <div className={`w-1.5 h-1.5 rounded-full ${p.id === playerId ? 'bg-violet-400' : p.isConnected ? 'bg-emerald-400/50' : 'bg-slate-700'}`} />
-                <span className={`text-[13px] ${p.id === playerId ? 'text-violet-300' : 'text-slate-400'}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${p.id === playerId ? 'bg-red-400' : p.isConnected ? 'bg-emerald-400/50' : 'bg-slate-700'}`} />
+                <span className={`text-[13px] ${p.id === playerId ? 'text-red-300' : 'text-slate-400'}`}>
                   {p.name}
                 </span>
               </motion.div>
@@ -121,8 +125,20 @@ export function DiscussionScreen({ room, playerId }: Props) {
         <div className="mt-auto pt-6 flex flex-col gap-2">
           {isHost && (
             <>
-              <Button fullWidth onClick={() => advanceToVoting(room.code)}>Počni glasanje</Button>
-              <Button variant="ghost" fullWidth onClick={() => shufflePrompt(room.code)}>Zameni pitanje</Button>
+              <Button
+                fullWidth
+                onClick={() => advanceToVoting(room.code)}
+                className="!rounded-2xl !text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                  boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+                }}
+              >
+                Počni glasanje
+              </Button>
+              <Button variant="ghost" fullWidth onClick={() => shufflePrompt(room.code)} className="!rounded-2xl">
+                Zameni pitanje
+              </Button>
             </>
           )}
         </div>

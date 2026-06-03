@@ -12,6 +12,9 @@ interface Props {
   playerId: string;
 }
 
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
+
 export function VotingScreen({ room, playerId }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
@@ -66,12 +69,11 @@ export function VotingScreen({ room, playerId }: Props) {
         {/* Radar progress */}
         <div className="flex justify-center">
           <div className="relative w-16 h-16">
-            {/* Radar ring */}
             <svg className="w-full h-full -rotate-90" viewBox="0 0 64 64">
-              <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(139,92,246,0.08)" strokeWidth="2" />
+              <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(220,38,38,0.08)" strokeWidth="2" />
               <motion.circle
                 cx="32" cy="32" r="28" fill="none"
-                stroke="rgba(139,92,246,0.6)"
+                stroke="rgba(220,38,38,0.6)"
                 strokeWidth="2"
                 strokeDasharray={`${2 * Math.PI * 28}`}
                 strokeLinecap="round"
@@ -79,19 +81,17 @@ export function VotingScreen({ room, playerId }: Props) {
                 transition={{ type: 'spring' as const, stiffness: 100, damping: 20 }}
               />
             </svg>
-            {/* Sweep line */}
             {!allVoted && (
               <motion.div
                 className="absolute inset-0"
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 3, ease: 'linear' }}
               >
-                <div className="absolute top-1/2 left-1/2 w-[1px] h-1/2 origin-bottom bg-gradient-to-t from-violet-500/60 to-transparent" style={{ transform: 'translate(-50%, -100%)' }} />
+                <div className="absolute top-1/2 left-1/2 w-[1px] h-1/2 origin-bottom bg-gradient-to-t from-red-500/60 to-transparent" style={{ transform: 'translate(-50%, -100%)' }} />
               </motion.div>
             )}
-            {/* Center count */}
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-[14px] font-bold text-violet-400 tabular-nums">
+              <span className="text-[14px] font-bold text-red-400 tabular-nums">
                 {totalVoted}
               </span>
             </div>
@@ -107,7 +107,7 @@ export function VotingScreen({ room, playerId }: Props) {
                 key={p.id}
                 animate={{ opacity: voted ? 1 : 0.35 }}
                 className={`text-[10px] px-2 py-0.5 rounded-md transition-all duration-500 ${
-                  voted ? 'text-violet-300 bg-violet-500/10' : 'text-slate-600'
+                  voted ? 'text-red-300 bg-red-500/10' : 'text-slate-600'
                 }`}
               >
                 {p.name}{voted ? ' ✓' : ''}
@@ -183,7 +183,16 @@ export function VotingScreen({ room, playerId }: Props) {
               animate={{ opacity: 1, y: 0 }}
               className="mt-auto pt-4"
             >
-              <Button fullWidth onClick={handleProcess} disabled={processing}>
+              <Button
+                fullWidth
+                onClick={handleProcess}
+                disabled={processing}
+                className="!rounded-2xl !text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                  boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+                }}
+              >
                 {processing ? 'Obrađujem...' : 'Otkrij rezultat'}
               </Button>
             </motion.div>

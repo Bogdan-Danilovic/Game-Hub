@@ -3,16 +3,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { ArrowLeft, Users, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { GameIcon } from '@/components/GameIcon';
+import { getGameById } from '@/lib/games/registry';
+import { hexA } from '@/lib/utils';
 import { createRoom, joinRoom } from '@/lib/firestore/impostor';
 import { useAuth } from '@/hooks/useAuth';
 
-const fadeIn = (delay = 0) => ({
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] },
-});
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
 
 const shake = {
   x: [0, -6, 6, -4, 4, -2, 2, 0],
@@ -22,8 +23,9 @@ const shake = {
 export function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const [name, setName] = useState('');
+  const GAME = getGameById('impostor');
 
+  const [name, setName] = useState('');
   useEffect(() => {
     if (profile?.displayName && name === '') setName(profile.displayName);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -76,89 +78,164 @@ export function HomeScreen() {
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
-      <div className="relative w-full max-w-[320px] flex flex-col gap-12">
+    <div className="relative flex flex-col flex-1 px-5 h-screen-safe overflow-hidden">
+      <motion.button
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        onClick={() => router.push('/')}
+        className="flex items-center gap-2 text-white/40 hover:text-white/70 transition-colors pt-6 pb-2 self-start"
+      >
+        <ArrowLeft size={16} />
+        <span className="text-[12px]">Hub</span>
+      </motion.button>
 
-        {/* Identity mark */}
-        <motion.div {...fadeIn(0.2)} className="flex flex-col items-start gap-6">
+      <div className="flex flex-col items-center justify-center flex-1 pb-8">
+        <div className="w-full max-w-[320px] flex flex-col gap-8">
+
+          {/* Hero card */}
           <motion.div
-            className="text-4xl"
-            animate={{ rotate: [0, -5, 5, -3, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+            className="w-full rounded-2xl border border-white/10 overflow-hidden"
+            style={{
+              background: `linear-gradient(135deg, ${hexA(ACCENT, 0.15)}, ${hexA(ACCENT2, 0.08)})`,
+              backdropFilter: 'blur(12px)',
+            }}
           >
-            🎭
+            <div className="p-6">
+              <div className="flex items-start justify-between mb-5">
+                {GAME && <GameIcon game={GAME} size={44} />}
+                <div className="flex flex-wrap gap-1.5 justify-end">
+                  {GAME?.tags?.slice(0, 2).map((tag: string) => (
+                    <span key={tag} className="text-[9px] px-2 py-0.5 rounded-full border border-white/10 text-white/40 uppercase tracking-wider">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <h1 className="text-[36px] font-bold tracking-[-0.04em] text-white leading-none mb-2">
+                {GAME?.name ?? 'Impostor'}
+              </h1>
+              <p className="text-[12px] text-white/40 leading-relaxed mb-5">
+                Jedan od vas laže. Ostali moraju da otkriju ko.
+              </p>
+
+              <div className="flex items-center gap-4 text-[11px] text-white/30">
+                <span className="flex items-center gap-1.5">
+                  <Users size={12} />
+                  {GAME?.minPlayers ?? 3}–{GAME?.maxPlayers ?? 10} igrača
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock size={12} />
+                  {GAME?.avgDuration ?? '10–20 min'}
+                </span>
+              </div>
+            </div>
           </motion.div>
 
-          <div>
-            <h1 className="text-[48px] font-bold tracking-[-0.04em] leading-[0.9] text-white">
-              Impostor
-            </h1>
-            <p className="mt-3 text-[13px] text-slate-500 leading-relaxed max-w-[260px]">
-              Jedan od vas laže. Ostali moraju da otkriju ko.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* Name */}
-        <motion.div {...fadeIn(0.4)}>
-          <Input
-            label="Tvoje ime"
-            placeholder="Unesi ime"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            maxLength={16}
-            autoComplete="off"
-          />
-        </motion.div>
-
-        {/* Actions */}
-        <motion.div {...fadeIn(0.6)} className="flex flex-col gap-4">
-          <Button
-            fullWidth
-            disabled={!nameValid || loading !== null}
-            onClick={handleCreate}
+          {/* Rules */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 24, delay: 0.1 }}
+            className="flex flex-col gap-2"
           >
-            {loading === 'create' ? (
-              <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                Kreiranje...
-              </motion.span>
-            ) : 'Napravi sobu'}
-          </Button>
+            {[
+              'Svaki igrač dobija pitanje — Impostor dobija drugačije',
+              'Diskutujte i pokušajte da otkrijete ko laže',
+              'Glasajte ko je Impostor — Impostor mora preživjeti',
+            ].map((rule, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] px-4 py-3"
+              >
+                <span
+                  className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold mt-0.5"
+                  style={{ background: hexA(ACCENT, 0.2), color: ACCENT2 }}
+                >
+                  {i + 1}
+                </span>
+                <p className="text-[12px] text-white/50 leading-relaxed">{rule}</p>
+              </div>
+            ))}
+          </motion.div>
 
-          {/* Join row */}
-          <div className="flex gap-3 items-end">
-            <div className="flex-1">
-              <Input
-                label="Kod sobe"
-                placeholder="_ _ _ _ _"
-                value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                maxLength={5}
-                className="text-center tracking-[0.4em] uppercase font-bold text-[16px]"
-              />
-            </div>
+          {/* Name */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Input
+              label="Tvoje ime"
+              placeholder="Unesi ime"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              maxLength={16}
+              autoComplete="off"
+              className="!rounded-2xl !border-white/10 !bg-white/[0.05] !text-white focus:!border-red-500/60 focus:!ring-red-500/25"
+            />
+          </motion.div>
+
+          {/* Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col gap-3"
+          >
             <Button
-              variant="secondary"
-              disabled={!nameValid || roomCode.trim().length !== 5 || loading !== null}
-              onClick={handleJoin}
-              className="shrink-0 mb-[1px]"
+              fullWidth
+              disabled={!nameValid || loading !== null}
+              onClick={handleCreate}
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+              }}
             >
-              {loading === 'join' ? '...' : 'Uđi'}
+              {loading === 'create' ? (
+                <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
+                  Kreiranje...
+                </motion.span>
+              ) : 'Napravi sobu'}
             </Button>
-          </div>
-        </motion.div>
 
-        {/* Error */}
-        {error && (
-          <motion.p
-            key={errorKey}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, ...shake }}
-            className="text-[13px] text-red-400/90 -mt-4"
-          >
-            {error}
-          </motion.p>
-        )}
+            <div className="flex gap-3 items-end">
+              <div className="flex-1">
+                <Input
+                  label="Kod sobe"
+                  placeholder="_ _ _ _ _"
+                  value={roomCode}
+                  onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                  maxLength={5}
+                  className="!rounded-2xl !border-white/10 !bg-white/[0.05] !text-white text-center tracking-[0.4em] uppercase font-bold text-[16px] focus:!border-red-500/60"
+                />
+              </div>
+              <Button
+                variant="secondary"
+                disabled={!nameValid || roomCode.trim().length !== 5 || loading !== null}
+                onClick={handleJoin}
+                className="shrink-0 mb-[1px] !rounded-2xl"
+              >
+                {loading === 'join' ? '...' : 'Uđi'}
+              </Button>
+            </div>
+          </motion.div>
+
+          {error && (
+            <motion.p
+              key={errorKey}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, ...shake }}
+              className="text-[13px] text-red-400/90 -mt-4"
+            >
+              {error}
+            </motion.p>
+          )}
+        </div>
       </div>
     </div>
   );

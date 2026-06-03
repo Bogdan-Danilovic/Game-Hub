@@ -11,6 +11,9 @@ interface Props {
   playerId: string;
 }
 
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
+
 export function RoleRevealScreen({ room, playerId }: Props) {
   const [revealed, setRevealed] = useState(false);
   const [hasSeen, setHasSeen] = useState(false);
@@ -25,7 +28,7 @@ export function RoleRevealScreen({ room, playerId }: Props) {
   const barColor = useTransform(holdProgress, [0, 0.5, 1],
     isImpostor
       ? ['rgba(239,68,68,0.3)', 'rgba(239,68,68,0.6)', 'rgba(239,68,68,0.9)']
-      : ['rgba(139,92,246,0.3)', 'rgba(139,92,246,0.6)', 'rgba(139,92,246,0.9)']
+      : ['rgba(16,185,129,0.3)', 'rgba(16,185,129,0.6)', 'rgba(16,185,129,0.9)']
   );
 
   const startHold = useCallback(() => {
@@ -58,14 +61,13 @@ export function RoleRevealScreen({ room, playerId }: Props) {
 
   return (
     <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
-      {/* Ambient color shift */}
       <motion.div
         className="fixed inset-0 pointer-events-none"
         animate={{
           background: revealed
             ? isImpostor
               ? 'radial-gradient(ellipse at center, rgba(239,68,68,0.06) 0%, transparent 70%)'
-              : 'radial-gradient(ellipse at center, rgba(139,92,246,0.06) 0%, transparent 70%)'
+              : 'radial-gradient(ellipse at center, rgba(16,185,129,0.06) 0%, transparent 70%)'
             : 'none',
         }}
         transition={{ duration: 0.8 }}
@@ -100,7 +102,6 @@ export function RoleRevealScreen({ room, playerId }: Props) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="absolute inset-0 flex flex-col items-center justify-center bg-surface/30 rounded-2xl overflow-hidden"
               >
-                {/* Hold progress bar — thermometer */}
                 <motion.div
                   className="absolute bottom-0 left-0 right-0"
                   style={{ height: barWidth, backgroundColor: barColor as unknown as string }}
@@ -128,10 +129,9 @@ export function RoleRevealScreen({ room, playerId }: Props) {
                 exit={{ opacity: 0 }}
                 className={`
                   absolute inset-0 flex flex-col items-center justify-center rounded-2xl p-8
-                  ${isImpostor ? 'bg-red-950/20 glow-d' : 'bg-violet-950/15 glow-v'}
+                  ${isImpostor ? 'bg-red-950/20 glow-d' : 'bg-emerald-950/15'}
                 `}
               >
-                {/* Glitch flash */}
                 <motion.div
                   className="absolute inset-0 bg-white/5 rounded-2xl"
                   animate={{ opacity: [0.3, 0, 0.1, 0] }}
@@ -142,10 +142,9 @@ export function RoleRevealScreen({ room, playerId }: Props) {
                   Ti si
                 </p>
 
-                {/* Role with glitch effect */}
                 <h2
                   className={`glitch-text text-[40px] font-bold tracking-[-0.03em] mb-8 ${
-                    isImpostor ? 'text-red-400 text-glow-d' : 'text-violet-400 text-glow-v'
+                    isImpostor ? 'text-red-400 text-glow-d' : 'text-emerald-400'
                   }`}
                   data-text={role}
                 >
@@ -161,7 +160,6 @@ export function RoleRevealScreen({ room, playerId }: Props) {
                   {prompt}
                 </p>
 
-                {/* Tap to dismiss hint */}
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -194,10 +192,18 @@ export function RoleRevealScreen({ room, playerId }: Props) {
             transition={{ delay: 0.4 }}
             className="w-full flex flex-col gap-2"
           >
-            <Button fullWidth onClick={() => advanceToDiscussion(room.code)}>
+            <Button
+              fullWidth
+              onClick={() => advanceToDiscussion(room.code)}
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+              }}
+            >
               Svi su videli → Diskusija
             </Button>
-            <Button variant="ghost" fullWidth onClick={() => shufflePrompt(room.code)}>
+            <Button variant="ghost" fullWidth onClick={() => shufflePrompt(room.code)} className="!rounded-2xl">
               Zameni pitanje
             </Button>
           </motion.div>

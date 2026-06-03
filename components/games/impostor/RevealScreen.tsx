@@ -11,6 +11,9 @@ interface Props {
   playerId: string;
 }
 
+const ACCENT = '#dc2626';
+const ACCENT2 = '#ef4444';
+
 export function RevealScreen({ room, playerId }: Props) {
   const isHost = room.hostId === playerId;
   const eliminated = room.players.find((p) => p.id === room.eliminatedId);
@@ -34,7 +37,7 @@ export function RevealScreen({ room, playerId }: Props) {
           opacity: 1,
           background: wasImpostor
             ? 'radial-gradient(ellipse at center, rgba(239,68,68,0.05) 0%, transparent 70%)'
-            : 'radial-gradient(ellipse at center, rgba(139,92,246,0.04) 0%, transparent 70%)',
+            : 'radial-gradient(ellipse at center, rgba(16,185,129,0.04) 0%, transparent 70%)',
         }}
         transition={{ delay: 1, duration: 1.5 }}
       />
@@ -42,17 +45,20 @@ export function RevealScreen({ room, playerId }: Props) {
       <div className="relative w-full max-w-[320px] flex flex-col items-center gap-8">
         {room.eliminatedId && eliminated ? (
           <>
-            {/* Dossier — opens from center */}
+            {/* Dossier */}
             <motion.div
               initial={{ scaleY: 0, opacity: 0 }}
               animate={{ scaleY: 1, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="w-full origin-center"
             >
-              <div className="w-full bg-surface/40 rounded-lg p-6 relative overflow-hidden">
+              <div
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.05] p-6 relative overflow-hidden"
+                style={{ backdropFilter: 'blur(12px)' }}
+              >
                 {/* Top line accent */}
                 <motion.div
-                  className={`absolute top-0 left-0 right-0 h-[2px] ${wasImpostor ? 'bg-red-500/60' : 'bg-violet-500/40'}`}
+                  className={`absolute top-0 left-0 right-0 h-[2px] ${wasImpostor ? 'bg-red-500/60' : 'bg-emerald-500/40'}`}
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ delay: 0.8, duration: 0.4 }}
@@ -76,7 +82,6 @@ export function RevealScreen({ room, playerId }: Props) {
                   </p>
                 </motion.div>
 
-                {/* Role reveal — stamped */}
                 {showRole && (
                   <motion.div
                     initial={{ scale: 2, opacity: 0, rotate: -15 }}
@@ -116,8 +121,8 @@ export function RevealScreen({ room, playerId }: Props) {
             >
               <p className="text-[9px] text-slate-500 tracking-[0.2em] uppercase mb-1">Pitanja</p>
               <div className="flex gap-2 text-[11px]">
-                <div className="flex-1 py-2 px-3 bg-violet-500/[0.04] rounded-md">
-                  <p className="text-violet-400/50 text-[8px] uppercase tracking-wider mb-0.5">Crew</p>
+                <div className="flex-1 py-2 px-3 bg-emerald-500/[0.04] rounded-md">
+                  <p className="text-emerald-400/50 text-[8px] uppercase tracking-wider mb-0.5">Crew</p>
                   <p className="text-slate-400">{room.currentPrompt.crew}</p>
                 </div>
                 <div className="flex-1 py-2 px-3 bg-red-500/[0.04] rounded-md">
@@ -146,7 +151,7 @@ export function RevealScreen({ room, playerId }: Props) {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.3 }}
-            className={`w-full text-center py-5 rounded-lg ${
+            className={`w-full text-center py-5 rounded-2xl border border-white/10 ${
               room.winner === 'crew' ? 'bg-emerald-500/[0.06]' : 'bg-red-500/[0.06]'
             }`}
           >
@@ -165,9 +170,29 @@ export function RevealScreen({ room, playerId }: Props) {
             className="w-full"
           >
             {gameOver ? (
-              <Button fullWidth onClick={() => finishGame(room.code)}>Prikaži rezultate</Button>
+              <Button
+                fullWidth
+                onClick={() => finishGame(room.code)}
+                className="!rounded-2xl !text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                  boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+                }}
+              >
+                Prikaži rezultate
+              </Button>
             ) : (
-              <Button fullWidth onClick={() => nextRound(room.code)}>Sledeća runda</Button>
+              <Button
+                fullWidth
+                onClick={() => nextRound(room.code)}
+                className="!rounded-2xl !text-white"
+                style={{
+                  background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                  boxShadow: '0 4px 16px rgba(220,38,38,0.4)',
+                }}
+              >
+                Sledeća runda
+              </Button>
             )}
           </motion.div>
         )}
