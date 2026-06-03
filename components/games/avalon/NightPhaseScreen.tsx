@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AvalonRoom, AvalonPlayer } from '@/lib/types/avalon';
 import { advanceFromNight } from '@/lib/firestore/avalon';
 import { Button } from '@/components/ui/Button';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AvalonRoom;
@@ -16,6 +17,9 @@ interface NightStep {
   subtext?: string;
   duration: number;
 }
+
+const ACCENT = '#7c3aed';
+const ACCENT2 = '#8b5cf6';
 
 function buildNightSteps(room: AvalonRoom): NightStep[] {
   const steps: NightStep[] = [
@@ -89,17 +93,13 @@ export function NightPhaseScreen({ room, playerId }: Props) {
       <motion.div
         className="fixed inset-0 pointer-events-none"
         animate={{
-          background: `radial-gradient(ellipse 300px 300px at center, rgba(217,119,6,${showNames ? 0.08 : 0.03}) 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse 300px 300px at center, ${hexA(ACCENT, showNames ? 0.08 : 0.04)} 0%, transparent 70%)`,
         }}
         transition={{ duration: 1.2 }}
       />
 
-      <div className="relative w-full max-w-[320px] flex flex-col items-center gap-10">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-[10px] text-slate-500 tracking-[0.2em] uppercase"
-        >
+      <div className="relative w-full max-w-[340px] flex flex-col items-center gap-10">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[10px] text-white/30 tracking-[0.2em] uppercase">
           Noćna faza
         </motion.div>
 
@@ -117,9 +117,7 @@ export function NightPhaseScreen({ room, playerId }: Props) {
                 {currentStep.text}
               </h2>
               {currentStep.subtext && (
-                <p className="text-[13px] text-slate-500">
-                  {currentStep.subtext}
-                </p>
+                <p className="text-[13px] text-white/40">{currentStep.subtext}</p>
               )}
             </motion.div>
           </AnimatePresence>
@@ -131,9 +129,10 @@ export function NightPhaseScreen({ room, playerId }: Props) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full p-5 rounded-xl bg-amber-950/20 border border-amber-500/10"
+              className="w-full p-5 rounded-2xl border border-white/10 bg-white/[0.05]"
+              style={{ backdropFilter: 'blur(12px)' }}
             >
-              <p className="text-[10px] text-amber-400/70 tracking-[0.2em] uppercase mb-3 text-center">
+              <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-3 text-center">
                 {label}
               </p>
               <div className="flex flex-col items-center gap-2">
@@ -142,7 +141,8 @@ export function NightPhaseScreen({ room, playerId }: Props) {
                     key={n}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="text-[15px] font-medium text-amber-300"
+                    className="text-[15px] font-medium"
+                    style={{ color: ACCENT2 }}
                   >
                     {n}
                   </motion.span>
@@ -152,15 +152,15 @@ export function NightPhaseScreen({ room, playerId }: Props) {
           )}
         </AnimatePresence>
 
+        {/* Progress dots */}
         <div className="flex gap-1.5">
           {steps.map((_, i) => (
             <motion.div
               key={i}
-              className={`h-1 rounded-full transition-colors duration-300 ${
-                i <= stepIndex ? 'bg-amber-500/60' : 'bg-white/[0.06]'
-              }`}
+              className="h-1 rounded-full transition-colors duration-300"
+              style={{ background: i <= stepIndex ? hexA(ACCENT2, 0.7) : 'rgba(255,255,255,0.06)' }}
               animate={{ width: i === stepIndex ? 24 : 8 }}
-              transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             />
           ))}
         </div>
@@ -175,7 +175,11 @@ export function NightPhaseScreen({ room, playerId }: Props) {
             <Button
               fullWidth
               onClick={() => advanceFromNight(room.code)}
-              className="!bg-amber-600 hover:!bg-amber-500"
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+              }}
             >
               Otkrij uloge
             </Button>

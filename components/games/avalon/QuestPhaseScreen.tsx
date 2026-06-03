@@ -5,11 +5,15 @@ import { motion } from 'framer-motion';
 import { AvalonRoom, QuestVote } from '@/lib/types/avalon';
 import { castQuestVote, resolveQuest } from '@/lib/firestore/avalon';
 import { Button } from '@/components/ui/Button';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AvalonRoom;
   playerId: string;
 }
+
+const ACCENT = '#7c3aed';
+const ACCENT2 = '#8b5cf6';
 
 export function QuestPhaseScreen({ room, playerId }: Props) {
   const [voting, setVoting] = useState(false);
@@ -43,38 +47,40 @@ export function QuestPhaseScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center flex-1 px-5 h-screen-safe overflow-hidden">
       <motion.div
         className="fixed inset-0 pointer-events-none"
         animate={{
-          background: 'radial-gradient(ellipse 400px 400px at center, rgba(217,119,6,0.04) 0%, transparent 70%)',
+          background: `radial-gradient(ellipse 400px 400px at center, ${hexA(ACCENT, 0.05)} 0%, transparent 70%)`,
         }}
       />
 
-      <div className="relative w-full max-w-[320px] flex flex-col items-center gap-8">
+      <div className="relative w-full max-w-[360px] flex flex-col items-center gap-8">
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-2">
+          <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-2">
             Misija {room.currentMission}
           </p>
           <h2 className="text-[24px] font-bold text-white">Tajna misija</h2>
         </motion.div>
 
+        {/* Mission team */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]"
+          className="w-full rounded-2xl border border-white/10 bg-white/[0.05] p-4"
+          style={{ backdropFilter: 'blur(12px)' }}
         >
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-3 text-center">Tim na misiji</p>
+          <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-3 text-center">Tim na misiji</p>
           <div className="flex flex-wrap justify-center gap-2">
             {missionPlayers.map((p) => (
               <span
                 key={p.id}
-                className={`px-3 py-1.5 rounded-lg text-[12px] font-medium ${
-                  p.id === playerId
-                    ? 'bg-amber-600/20 text-amber-300 border border-amber-500/30'
-                    : 'bg-white/[0.03] text-slate-400'
-                }`}
+                className="px-3 py-1.5 rounded-xl text-[12px] font-medium"
+                style={p.id === playerId
+                  ? { background: hexA(ACCENT, 0.15), border: `1px solid ${hexA(ACCENT, 0.35)}`, color: ACCENT2 }
+                  : { background: 'rgba(255,255,255,0.03)', color: '#94a3b8' }
+                }
               >
                 {p.name}{p.id === playerId ? ' (ti)' : ''}
               </span>
@@ -82,6 +88,7 @@ export function QuestPhaseScreen({ room, playerId }: Props) {
           </div>
         </motion.div>
 
+        {/* Vote buttons */}
         {isOnMission && !hasVoted && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -89,25 +96,15 @@ export function QuestPhaseScreen({ room, playerId }: Props) {
             transition={{ delay: 0.3 }}
             className="w-full flex flex-col gap-4"
           >
-            <p className="text-[12px] text-slate-400 text-center">
+            <p className="text-[12px] text-white/40 text-center">
               {isEvil ? 'Možeš sabotirati ili pomoći...' : 'Glasaj za uspjeh misije'}
             </p>
             <div className="flex gap-4">
-              <Button
-                fullWidth
-                disabled={voting}
-                onClick={() => handleVote('success')}
-                className="!bg-blue-600/80 hover:!bg-blue-500"
-              >
+              <Button fullWidth disabled={voting} onClick={() => handleVote('success')} className="!bg-blue-600/80 hover:!bg-blue-500 !rounded-2xl">
                 ✓ Uspjeh
               </Button>
               {isEvil && (
-                <Button
-                  fullWidth
-                  disabled={voting}
-                  onClick={() => handleVote('sabotage')}
-                  className="!bg-red-600/60 hover:!bg-red-500/70"
-                >
+                <Button fullWidth disabled={voting} onClick={() => handleVote('sabotage')} className="!bg-red-600/60 hover:!bg-red-500/70 !rounded-2xl">
                   ✗ Sabotaža
                 </Button>
               )}
@@ -116,11 +113,7 @@ export function QuestPhaseScreen({ room, playerId }: Props) {
         )}
 
         {isOnMission && hasVoted && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-[14px] text-slate-400"
-          >
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-[14px] text-white/40">
             Glas poslan. Čekamo ostale...
           </motion.p>
         )}
@@ -132,20 +125,22 @@ export function QuestPhaseScreen({ room, playerId }: Props) {
             className="flex flex-col items-center gap-3 py-4"
           >
             <span className="text-3xl">⏳</span>
-            <p className="text-[12px] text-slate-600">Tim je na misiji...</p>
+            <p className="text-[12px] text-white/30">Tim je na misiji...</p>
           </motion.div>
         )}
 
+        {/* Vote progress */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">Glasovi misije</p>
-            <p className="text-[12px] text-slate-400">{totalVoted}/{totalExpected}</p>
+            <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase">Glasovi misije</p>
+            <p className="text-[12px] text-white/40">{totalVoted}/{totalExpected}</p>
           </div>
           <div className="w-full h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-amber-500/60 rounded-full"
+              className="h-full rounded-full"
+              style={{ background: `linear-gradient(90deg, ${ACCENT}, ${ACCENT2})` }}
               animate={{ width: `${(totalVoted / totalExpected) * 100}%` }}
-              transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             />
           </div>
         </motion.div>

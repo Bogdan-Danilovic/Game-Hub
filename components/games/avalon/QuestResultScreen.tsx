@@ -4,11 +4,15 @@ import { motion } from 'framer-motion';
 import { AvalonRoom, getSabotagesRequired } from '@/lib/types/avalon';
 import { advanceFromQuestResult } from '@/lib/firestore/avalon';
 import { Button } from '@/components/ui/Button';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AvalonRoom;
   playerId: string;
 }
+
+const ACCENT = '#7c3aed';
+const ACCENT2 = '#8b5cf6';
 
 export function QuestResultScreen({ room, playerId }: Props) {
   const isHost = room.hostId === playerId;
@@ -17,7 +21,7 @@ export function QuestResultScreen({ room, playerId }: Props) {
   const required = getSabotagesRequired(room.players.length, lastResult?.missionNumber ?? 1);
 
   return (
-    <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
+    <div className="relative flex flex-col items-center justify-center flex-1 px-5 h-screen-safe overflow-hidden">
       <motion.div
         className="fixed inset-0 pointer-events-none"
         animate={{
@@ -28,17 +32,17 @@ export function QuestResultScreen({ room, playerId }: Props) {
         transition={{ duration: 0.8 }}
       />
 
-      <div className="relative w-full max-w-[320px] flex flex-col items-center gap-8">
+      <div className="relative w-full max-w-[340px] flex flex-col items-center gap-8">
 
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center">
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-4">
+          <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-4">
             Misija {lastResult?.missionNumber ?? room.currentMission}
           </p>
 
           <motion.div
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring' as const, stiffness: 150, damping: 12 }}
+            transition={{ type: 'spring', stiffness: 150, damping: 12 }}
             className={`w-24 h-24 rounded-full mx-auto mb-6 flex items-center justify-center ${
               success ? 'bg-blue-500/20 border-2 border-blue-400' : 'bg-red-500/20 border-2 border-red-400'
             }`}
@@ -63,29 +67,34 @@ export function QuestResultScreen({ room, playerId }: Props) {
           transition={{ delay: 0.5 }}
           className="text-center"
         >
-          <p className="text-[13px] text-slate-400">
-            Sabotaže: <span className={lastResult?.sabotages ? 'text-red-400 font-bold' : 'text-slate-300'}>{lastResult?.sabotages ?? 0}</span>
-            {required > 1 && <span className="text-slate-600"> (potrebno {required})</span>}
+          <p className="text-[13px] text-white/40">
+            Sabotaže:{' '}
+            <span className={lastResult?.sabotages ? 'text-red-400 font-bold' : 'text-white/70'}>
+              {lastResult?.sabotages ?? 0}
+            </span>
+            {required > 1 && <span className="text-white/25"> (potrebno {required})</span>}
           </p>
         </motion.div>
 
+        {/* Score */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7 }}
-          className="flex gap-8"
+          className="flex items-center gap-8 rounded-2xl border border-white/10 bg-white/[0.05] px-8 py-4"
         >
           <div className="text-center">
             <p className="text-[28px] font-bold text-blue-400">{room.goodScore}</p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Dobro</p>
+            <p className="text-[10px] text-white/30 uppercase tracking-wider">Dobro</p>
           </div>
-          <div className="w-px bg-white/[0.06]" />
+          <div className="w-px h-10 bg-white/[0.06]" />
           <div className="text-center">
             <p className="text-[28px] font-bold text-red-400">{room.evilScore}</p>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Zlo</p>
+            <p className="text-[10px] text-white/30 uppercase tracking-wider">Zlo</p>
           </div>
         </motion.div>
 
+        {/* Mission dots */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -97,12 +106,12 @@ export function QuestResultScreen({ room, playerId }: Props) {
             return (
               <div
                 key={m}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold border-2 ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center text-[12px] font-bold border-2 ${
                   result?.result === 'success'
                     ? 'bg-blue-500/20 border-blue-400 text-blue-400'
                     : result?.result === 'fail'
                       ? 'bg-red-500/20 border-red-400 text-red-400'
-                      : 'border-slate-700 text-slate-600'
+                      : 'border-white/10 text-white/25'
                 }`}
               >
                 {m}
@@ -121,7 +130,11 @@ export function QuestResultScreen({ room, playerId }: Props) {
             <Button
               fullWidth
               onClick={() => advanceFromQuestResult(room.code)}
-              className="!bg-amber-600 hover:!bg-amber-500"
+              className="!rounded-2xl !text-white"
+              style={{
+                background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+                boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+              }}
             >
               Nastavi →
             </Button>

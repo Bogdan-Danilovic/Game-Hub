@@ -208,7 +208,7 @@ export function RoleRevealScreen({ room, playerId }: Props) {
                     <div className="w-12 h-px bg-white/[0.06] mb-5" />
                     <div className="flex flex-col items-center gap-2">
                       {info.lines.map((line, i) => (
-                        <p key={i} className="text-[13px] text-amber-300/80 text-center">
+                        <p key={i} className="text-[13px] text-violet-300/80 text-center">
                           {line}
                         </p>
                       ))}
@@ -247,7 +247,11 @@ export function RoleRevealScreen({ room, playerId }: Props) {
             <Button
               fullWidth
               onClick={() => advanceFromRoleReveal(room.code)}
-              className="!bg-amber-600 hover:!bg-amber-500"
+              className="!rounded-2xl !text-white"
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed, #8b5cf6)',
+                boxShadow: '0 4px 16px rgba(124,58,237,0.4)',
+              }}
             >
               Svi su videli → Prva misija
             </Button>

@@ -3,10 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { ArrowLeft, Users, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { GameIcon } from '@/components/GameIcon';
 import { createRoom, joinRoom } from '@/lib/firestore/avalon';
+import { getGameById } from '@/lib/games/registry';
+import { hexA } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+
+const GAME = getGameById('avalon')!;
+const ACCENT = '#7c3aed';
+const ACCENT2 = '#8b5cf6';
+const ONLINE = '#30d158';
+const RULES = [
+  'Vitezovi Dobra i agenti Zla igraju anonimno.',
+  'Svaka runda lider bira tim za tajnu misiju.',
+  'Glasaj: Odobri ili Odbij prijedlog tima.',
+  'Merlin zna Zlo — ali mora ostati u sjeni.',
+];
 
 const fadeIn = (delay = 0) => ({
   initial: { opacity: 0, y: 16 },
@@ -76,29 +91,67 @@ export function HomeScreen() {
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center flex-1 px-8 h-screen-safe overflow-hidden">
-      <div className="relative w-full max-w-[320px] flex flex-col gap-12">
+    <div className="flex-1 overflow-y-auto no-scrollbar">
+      <div className="mx-auto flex w-full max-w-[400px] flex-col gap-6 px-5 pb-14 pt-20">
+        {/* Back to hub */}
+        <motion.button
+          {...fadeIn(0.05)}
+          type="button"
+          onClick={() => router.push('/')}
+          aria-label="Nazad na hub"
+          className="flex h-9 w-9 items-center justify-center self-start rounded-full text-white"
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
+        >
+          <ArrowLeft size={18} strokeWidth={2.2} />
+        </motion.button>
 
-        <motion.div {...fadeIn(0.2)} className="flex flex-col items-start gap-6">
-          <motion.div
-            className="text-4xl"
-            animate={{ rotate: [0, -3, 3, -2, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            ⚔️
-          </motion.div>
-
-          <div>
-            <h1 className="text-[48px] font-bold tracking-[-0.04em] leading-[0.9] text-white">
-              Avalon
-            </h1>
-            <p className="mt-3 text-[13px] text-slate-500 leading-relaxed max-w-[260px]">
-              Vitezovi Arthurovog stola. Jedan od vas služi Zlu.
-            </p>
+        {/* Hero */}
+        <motion.div
+          {...fadeIn(0.15)}
+          className="rounded-3xl p-6"
+          style={{
+            background: `linear-gradient(160deg, ${hexA(ACCENT, 0.28)} 0%, rgba(0,0,0,0.85) 100%)`,
+            border: `1px solid ${hexA(ACCENT, 0.25)}`,
+            boxShadow: `0 20px 60px ${hexA(ACCENT, 0.25)}`,
+          }}
+        >
+          <div className="mb-4 flex items-center gap-4">
+            <GameIcon game={GAME} size={64} />
+            <div className="min-w-0 flex-1">
+              <div className="text-[26px] font-extrabold tracking-[-0.5px] text-white">{GAME.name}</div>
+              <div className="mt-1 inline-flex items-center gap-1.5">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ background: ONLINE, boxShadow: `0 0 6px ${ONLINE}`, animation: 'gh-pulse 2s ease-in-out infinite' }}
+                />
+                <span className="text-[13px] font-semibold" style={{ color: ONLINE }}>Dostupno</span>
+              </div>
+            </div>
+          </div>
+          <p className="m-0 text-sm leading-relaxed text-white/70">{GAME.description}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.08] px-3 py-1.5 text-[13px] font-semibold text-white">
+              <Users size={14} strokeWidth={2} />
+              {GAME.minPlayers}–{GAME.maxPlayers}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/[0.08] px-3 py-1.5 text-[13px] font-semibold text-white">
+              <Clock size={14} strokeWidth={2} />
+              {GAME.avgDuration}
+            </span>
+            {GAME.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full px-3 py-1.5 text-[13px] font-semibold capitalize text-white"
+                style={{ background: hexA(ACCENT, 0.18), border: `1px solid ${hexA(ACCENT, 0.35)}` }}
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         </motion.div>
 
-        <motion.div {...fadeIn(0.4)}>
+        {/* Name + actions */}
+        <motion.div {...fadeIn(0.3)} className="flex flex-col gap-4">
           <Input
             label="Tvoje ime"
             placeholder="Unesi ime"
@@ -106,24 +159,29 @@ export function HomeScreen() {
             onChange={(e) => setName(e.target.value)}
             maxLength={16}
             autoComplete="off"
+            className="!rounded-2xl !border-white/10 !bg-white/[0.05] !text-white focus:!border-violet-500/60 focus:!ring-violet-500/25"
           />
-        </motion.div>
 
-        <motion.div {...fadeIn(0.6)} className="flex flex-col gap-4">
           <Button
             fullWidth
             disabled={!nameValid || loading !== null}
             onClick={handleCreate}
-            className="!bg-amber-600 hover:!bg-amber-500 active:!bg-amber-700"
+            className="!rounded-2xl !text-white"
+            style={{
+              background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})`,
+              boxShadow: `0 4px 16px ${hexA(ACCENT, 0.4)}`,
+            }}
           >
             {loading === 'create' ? (
               <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
                 Kreiranje...
               </motion.span>
-            ) : 'Napravi sobu'}
+            ) : (
+              'Napravi sobu'
+            )}
           </Button>
 
-          <div className="flex gap-3 items-end">
+          <div className="flex items-end gap-3">
             <div className="flex-1">
               <Input
                 label="Kod sobe"
@@ -131,30 +189,52 @@ export function HomeScreen() {
                 value={roomCode}
                 onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                 maxLength={5}
-                className="text-center tracking-[0.4em] uppercase font-bold text-[16px]"
+                className="!rounded-2xl !border-white/10 !bg-white/[0.05] !text-white text-center text-[16px] font-bold uppercase tracking-[0.4em] focus:!border-violet-500/60 focus:!ring-violet-500/25"
               />
             </div>
             <Button
               variant="secondary"
               disabled={!nameValid || roomCode.trim().length !== 5 || loading !== null}
               onClick={handleJoin}
-              className="shrink-0 mb-[1px] !border-amber-500/40 !text-amber-400 hover:!border-amber-400 hover:!text-amber-300"
+              className="mb-[1px] shrink-0 !rounded-2xl !border-white/14 !text-white"
+              style={{ background: 'rgba(255,255,255,0.08)' }}
             >
               {loading === 'join' ? '...' : 'Uđi'}
             </Button>
           </div>
+
+          {error && (
+            <motion.p
+              key={errorKey}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, ...shake }}
+              className="text-[13px] text-red-400/90"
+            >
+              {error}
+            </motion.p>
+          )}
         </motion.div>
 
-        {error && (
-          <motion.p
-            key={errorKey}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, ...shake }}
-            className="text-[13px] text-red-400/90 -mt-4"
-          >
-            {error}
-          </motion.p>
-        )}
+        {/* How to play */}
+        <motion.div {...fadeIn(0.45)}>
+          <div className="mb-3 text-lg font-extrabold tracking-[-0.3px] text-white">Kako se igra</div>
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.05]">
+            {RULES.map((rule, i) => (
+              <div
+                key={rule}
+                className={`flex items-center gap-3 px-4 py-3.5 ${i ? 'border-t border-white/[0.07]' : ''}`}
+              >
+                <div
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold text-white"
+                  style={{ background: `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})` }}
+                >
+                  {i + 1}
+                </div>
+                <span className="text-sm leading-snug text-white/85">{rule}</span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </div>
   );

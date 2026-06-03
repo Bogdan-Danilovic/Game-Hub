@@ -5,11 +5,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AvalonRoom, getMissionTeamSize } from '@/lib/types/avalon';
 import { proposeTeam } from '@/lib/firestore/avalon';
 import { Button } from '@/components/ui/Button';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AvalonRoom;
   playerId: string;
 }
+
+const ACCENT = '#7c3aed';
+const ACCENT2 = '#8b5cf6';
 
 export function MissionProposeScreen({ room, playerId }: Props) {
   const [selected, setSelected] = useState<string[]>([]);
@@ -41,11 +45,12 @@ export function MissionProposeScreen({ room, playerId }: Props) {
   }
 
   return (
-    <div className="relative flex flex-col flex-1 px-8 py-10 h-screen-safe overflow-y-auto">
-      <div className="relative w-full max-w-[360px] mx-auto flex flex-col gap-8 flex-1">
+    <div className="relative flex flex-col flex-1 px-5 py-10 h-screen-safe overflow-y-auto no-scrollbar">
+      <div className="relative w-full max-w-[400px] mx-auto flex flex-col gap-8 flex-1">
 
+        {/* Mission tracker */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-4">
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">
+          <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase">
             Misija {room.currentMission} od 5
           </p>
 
@@ -64,9 +69,10 @@ export function MissionProposeScreen({ room, playerId }: Props) {
                       : result?.result === 'fail'
                         ? 'bg-red-500/20 border-red-400 text-red-400'
                         : isCurrent
-                          ? 'border-amber-500 text-amber-400'
-                          : 'border-slate-700 text-slate-600'
+                          ? 'text-white'
+                          : 'border-white/10 text-white/25'
                   }`}
+                  style={isCurrent ? { border: `2px solid ${ACCENT2}`, color: ACCENT2 } : {}}
                 >
                   {m}
                 </motion.div>
@@ -81,20 +87,26 @@ export function MissionProposeScreen({ room, playerId }: Props) {
           )}
         </motion.div>
 
+        {/* Leader info */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center"
+          className="rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4 text-center"
+          style={{ backdropFilter: 'blur(12px)' }}
         >
-          <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-2">Lider</p>
-          <p className="text-[18px] font-bold text-amber-400" style={{ textShadow: '0 0 12px rgba(217,119,6,0.3)' }}>
+          <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-2">Lider</p>
+          <p
+            className="text-[18px] font-bold"
+            style={{ color: ACCENT2, textShadow: `0 0 12px ${hexA(ACCENT, 0.4)}` }}
+          >
             {leader?.name ?? '...'}
           </p>
-          <p className="text-[12px] text-slate-500 mt-1">
+          <p className="text-[12px] text-white/40 mt-1">
             {isLeader ? `Izaberi ${teamSize} vitezova za misiju` : `${leader?.name} bira tim...`}
           </p>
         </motion.div>
 
+        {/* Player selection */}
         {isLeader && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -102,7 +114,7 @@ export function MissionProposeScreen({ room, playerId }: Props) {
             transition={{ delay: 0.2 }}
             className="flex flex-col gap-2"
           >
-            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase mb-1">
+            <p className="text-[10px] text-white/30 tracking-[0.2em] uppercase mb-1">
               Tim · {selected.length}/{teamSize}
             </p>
             {room.players
@@ -114,28 +126,33 @@ export function MissionProposeScreen({ room, playerId }: Props) {
                     key={p.id}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => togglePlayer(p.id)}
-                    className={`flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200 ${
-                      isSelected
-                        ? 'bg-amber-600/20 border border-amber-500/40'
-                        : 'bg-white/[0.02] border border-transparent hover:bg-white/[0.04]'
-                    }`}
+                    className="flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-200"
+                    style={{
+                      background: isSelected ? hexA(ACCENT, 0.15) : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${isSelected ? hexA(ACCENT, 0.4) : 'transparent'}`,
+                    }}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      isSelected ? 'border-amber-400 bg-amber-500/30' : 'border-slate-600'
-                    }`}>
+                    <div
+                      className="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+                      style={{
+                        borderColor: isSelected ? ACCENT2 : '#475569',
+                        background: isSelected ? hexA(ACCENT, 0.25) : 'transparent',
+                      }}
+                    >
                       {isSelected && (
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="w-2.5 h-2.5 rounded-full bg-amber-400"
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ background: ACCENT2 }}
                         />
                       )}
                     </div>
-                    <span className={`text-[14px] font-medium ${isSelected ? 'text-amber-300' : 'text-slate-300'}`}>
+                    <span className="text-[14px] font-medium" style={{ color: isSelected ? ACCENT2 : '#94a3b8' }}>
                       {p.name}
                     </span>
                     {p.id === playerId && (
-                      <span className="text-[9px] text-amber-500/60 tracking-[0.15em] uppercase">ti</span>
+                      <span className="text-[9px] text-white/30 tracking-[0.15em] uppercase">ti</span>
                     )}
                   </motion.button>
                 );
@@ -150,7 +167,7 @@ export function MissionProposeScreen({ room, playerId }: Props) {
             className="flex flex-col items-center gap-3 py-8"
           >
             <span className="text-3xl">⏳</span>
-            <p className="text-[12px] text-slate-600">Čekamo liderov izbor...</p>
+            <p className="text-[12px] text-white/30">Čekamo liderov izbor...</p>
           </motion.div>
         )}
 
@@ -160,7 +177,11 @@ export function MissionProposeScreen({ room, playerId }: Props) {
               fullWidth
               disabled={!canSubmit || submitting}
               onClick={handleSubmit}
-              className="!bg-amber-600 hover:!bg-amber-500"
+              className="!rounded-2xl !text-white"
+              style={{
+                background: canSubmit ? `linear-gradient(135deg, ${ACCENT}, ${ACCENT2})` : 'rgba(255,255,255,0.05)',
+                boxShadow: canSubmit ? `0 4px 16px ${hexA(ACCENT, 0.4)}` : 'none',
+              }}
             >
               {submitting ? 'Šaljem...' : canSubmit ? 'Predloži tim' : `Izaberi još ${teamSize - selected.length}`}
             </Button>
