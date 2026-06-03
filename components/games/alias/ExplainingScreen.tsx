@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AliasRoom } from '@/lib/types/alias';
 import { scoreWord, skipWord, endRound } from '@/lib/firestore/alias';
+import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AliasRoom;
@@ -19,6 +20,7 @@ const TEAM_COLORS = {
     cardBorder: 'rgba(8,145,178,0.25)',
     cardGlow: '0 0 40px rgba(8,145,178,0.12), 0 8px 32px rgba(0,0,0,0.5)',
     orb: 'rgba(8,145,178,0.08)',
+    accent: '#0891b2',
   },
   b: {
     text: 'text-amber-400',
@@ -28,6 +30,7 @@ const TEAM_COLORS = {
     cardBorder: 'rgba(245,158,11,0.25)',
     cardGlow: '0 0 40px rgba(245,158,11,0.12), 0 8px 32px rgba(0,0,0,0.5)',
     orb: 'rgba(245,158,11,0.08)',
+    accent: '#f59e0b',
   },
 };
 
@@ -93,10 +96,7 @@ export function ExplainingScreen({ room, playerId }: Props) {
   }, 0);
 
   return (
-    <div
-      className="relative flex flex-col items-center justify-center flex-1 px-5 h-screen-safe overflow-hidden"
-      style={{ background: 'var(--bg-base)' }}
-    >
+    <div className="relative flex flex-col items-center justify-center flex-1 px-5 h-screen-safe overflow-hidden">
       {/* Flash overlay */}
       <AnimatePresence>
         {flash && (
@@ -164,11 +164,10 @@ export function ExplainingScreen({ room, playerId }: Props) {
               >
                 {room.scores[team]}
               </p>
-              <p className="text-[8px] text-slate-500 uppercase tracking-wider mt-0.5">poena ukupno</p>
+              <p className="text-[8px] text-white/30 uppercase tracking-wider mt-0.5">poena ukupno</p>
             </div>
             <div
-              className="px-2.5 py-1 rounded-full text-[10px] font-medium"
-              style={{ background: 'rgba(255,255,255,0.05)', color: '#64748b' }}
+              className="px-2.5 py-1 rounded-full text-[10px] font-medium border border-white/10 bg-white/[0.05]"
             >
               runda:{' '}
               <span className={`font-bold ${roundScore >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -221,20 +220,16 @@ export function ExplainingScreen({ room, playerId }: Props) {
           </AnimatePresence>
         ) : (
           <div
-            className="w-full min-h-[140px] rounded-3xl flex flex-col items-center justify-center gap-2"
-            style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px solid rgba(255,255,255,0.05)',
-            }}
+            className="w-full min-h-[140px] rounded-3xl flex flex-col items-center justify-center gap-2 border border-white/10 bg-white/[0.05]"
           >
             <motion.p
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="text-[14px] text-slate-400"
+              className="text-[14px] text-white/50"
             >
               {explainer?.name} objašnjava...
             </motion.p>
-            <p className="text-[11px] text-slate-600">Pogađaj riječ!</p>
+            <p className="text-[11px] text-white/25">Pogađaj riječ!</p>
           </div>
         )}
 
@@ -250,8 +245,8 @@ export function ExplainingScreen({ room, playerId }: Props) {
               onClick={handleWrong}
               className="flex-1 py-5 rounded-2xl text-[22px] font-bold active:scale-95 transition-all duration-150 cursor-pointer"
               style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(239,68,68,0.10)',
+                border: '1px solid rgba(239,68,68,0.20)',
                 color: '#f87171',
               }}
             >
@@ -259,12 +254,7 @@ export function ExplainingScreen({ room, playerId }: Props) {
             </button>
             <button
               onClick={handleSkip}
-              className="flex-1 py-5 rounded-2xl text-[13px] font-medium active:scale-95 transition-all duration-150 cursor-pointer"
-              style={{
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                color: '#475569',
-              }}
+              className="flex-1 py-5 rounded-2xl text-[13px] font-medium active:scale-95 transition-all duration-150 cursor-pointer border border-white/10 bg-white/[0.05] text-white/40"
             >
               Preskoči
             </button>
@@ -272,7 +262,7 @@ export function ExplainingScreen({ room, playerId }: Props) {
               onClick={handleCorrect}
               className="flex-1 py-5 rounded-2xl text-[22px] font-bold active:scale-95 transition-all duration-150 cursor-pointer"
               style={{
-                background: 'rgba(16,185,129,0.1)',
+                background: 'rgba(16,185,129,0.10)',
                 border: '1px solid rgba(16,185,129,0.25)',
                 color: '#34d399',
               }}
