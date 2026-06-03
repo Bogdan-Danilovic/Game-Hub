@@ -4,7 +4,7 @@ import { AdBanner } from '@/components/ads/AdBanner';
 
 export default function HubPage() {
   return (
-    <main className="relative min-h-dvh overflow-x-hidden">
+    <main className="relative min-h-dvh">
       {/* Background: soft radial accent orbs (constrained to the hub column) */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0 mx-auto max-w-[480px] overflow-hidden">
         <div
