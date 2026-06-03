@@ -1,3 +1,5 @@
+'use client';
+
 import { useRouter } from 'next/navigation';
 import type { GameDefinition } from '@/lib/games/registry';
 
@@ -16,8 +18,8 @@ export function HotCard({ game, delay = 0 }: { game: GameDefinition; delay?: num
           if (game.available) router.push(game.path);
         }
       }}
-      className="relative rounded-[18px] overflow-hidden cursor-pointer active:scale-[0.97] transition-transform duration-150"
-      style={{ background: `linear-gradient(145deg, ${a}55 0%, ${a}22 100%)`, minHeight: 100 }}
+      className="relative rounded-[18px] overflow-hidden cursor-pointer"
+      style={{ background: `linear-gradient(145deg, ${a}55 0%, ${a}22 100%)`, minHeight: 100, touchAction: 'pan-y' }}
     >
       <div
         className="gh-bob absolute right-2 bottom-2 text-[38px] opacity-[0.22] select-none leading-none"

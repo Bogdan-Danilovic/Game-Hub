@@ -18,8 +18,8 @@ export function HeroCard({ game }: { game: GameDefinition }) {
           if (game.available) router.push(game.path);
         }
       }}
-      className="relative rounded-[22px] overflow-hidden cursor-pointer active:scale-[0.98] transition-transform duration-150"
-      style={{ background: `linear-gradient(145deg, ${a}55 0%, ${a}1a 100%)`, minHeight: 178 }}
+      className="relative rounded-[22px] overflow-hidden cursor-pointer"
+      style={{ background: `linear-gradient(145deg, ${a}55 0%, ${a}1a 100%)`, minHeight: 178, touchAction: 'pan-y' }}
     >
       <div
         className="absolute rounded-full pointer-events-none"

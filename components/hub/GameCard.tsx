@@ -38,9 +38,10 @@ export function GameCard({ game, index }: { game: GameDefinition; index: number 
           if (game.available) router.push(game.path);
         }
       }}
-      className={`rounded-[18px] overflow-hidden border border-white/[0.08] bg-white/[0.04] active:scale-[0.97] transition-transform duration-150 ${
+      className={`rounded-[18px] overflow-hidden border border-white/[0.08] bg-white/[0.04] ${
         game.available ? 'cursor-pointer' : 'cursor-not-allowed opacity-55'
       }`}
+      style={{ touchAction: 'pan-y' }}
     >
       {/* Thumbnail */}
       <div className="relative h-[90px] flex items-center justify-center overflow-hidden">
