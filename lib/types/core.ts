@@ -24,7 +24,11 @@ export type RoomStatus =
   | 'drawing'
   | 'round-results'
   | 'writing'
-  | 'reveal';
+  | 'reveal'
+  | 'challenge_window'
+  | 'challenge_result'
+  | 'last_card_window'
+  | 'spicy_trophy';
 
 export interface BasePlayer {
   id: string;
