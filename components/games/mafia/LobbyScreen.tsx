@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MafiaRoom, ROLE_TABLE } from '@/lib/types/mafia';
 import { Button } from '@/components/ui/Button';
@@ -17,18 +17,22 @@ const ACCENT2 = '#ef4444';
 function DecryptCode({ code }: { code: string }) {
   const [revealed, setRevealed] = useState(0);
   const chars = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useState(() => {
+  const charsRef = useRef<string[]>(
+    code.split('').map(() => chars[Math.floor(Math.random() * chars.length)])
+  );
+
+  useEffect(() => {
     if (revealed >= code.length) return;
-    const t = setTimeout(() => setRevealed((r) => r + 1), 120);
+    const t = setTimeout(() => setRevealed((r) => r + 1), 110);
     return () => clearTimeout(t);
-  });
+  }, [revealed, code.length]);
+
   return (
     <span className="inline-flex tracking-[0.4em]">
       {code.split('').map((char, i) => (
         <motion.span key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className={i < revealed ? 'text-red-400' : 'text-slate-600'}>
-          {i < revealed ? char : chars[Math.floor(Math.random() * chars.length)]}
+          {i < revealed ? char : charsRef.current[i]}
         </motion.span>
       ))}
     </span>
@@ -106,11 +110,11 @@ export function LobbyScreen({ room, playerId }: Props) {
         {/* Players */}
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
           <div className="flex items-baseline justify-between mb-3">
-            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">Igrači · {playerCount}</p>
+            <p className="text-[10px] text-slate-500 tracking-[0.2em] uppercase">Igrači · {playerCount} / 6 min</p>
             {!canStart && (
               <motion.p animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 2 }}
                 className="text-[10px] text-amber-400/70">
-                čekamo još {6 - playerCount}
+                još {6 - playerCount} za start
               </motion.p>
             )}
           </div>
@@ -184,7 +188,7 @@ export function LobbyScreen({ room, playerId }: Props) {
                 boxShadow: canStart ? '0 4px 16px rgba(220,38,38,0.4)' : undefined,
               }}
             >
-              {starting ? 'Pokretanje...' : canStart ? 'Pokreni igru' : `Još ${6 - playerCount} igrača`}
+              {starting ? 'Pokretanje...' : canStart ? 'Pokreni igru' : `Potrebno minimalno 6 igrača`}
             </Button>
           )}
           <Button variant="ghost" fullWidth onClick={handleLeave} className="!rounded-2xl">
