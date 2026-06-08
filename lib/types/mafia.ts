@@ -61,6 +61,7 @@ export interface MafiaPlayer extends BasePlayer {
 
 export interface MafiaSettings extends GameSettings {
   showRoleOnEliminate: boolean;
+  customRoles?: Record<Role, number>;
 }
 
 export interface MafiaRoom extends Omit<BaseRoom, 'players'> {
@@ -91,4 +92,14 @@ export function getRolesForCount(count: number): Role[] {
   const base = [...(ROLE_TABLE[14] ?? [])];
   const extra = count - 14;
   return [...base, ...Array(Math.max(0, extra)).fill('civil' as Role)];
+}
+
+export function customRolesToArray(customRoles: Record<Role, number>): Role[] {
+  const roles: Role[] = [];
+  for (const [r, count] of Object.entries(customRoles)) {
+    for (let i = 0; i < count; i++) {
+      roles.push(r as Role);
+    }
+  }
+  return roles;
 }

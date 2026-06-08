@@ -2,11 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MafiaRoom, ROLE_TABLE } from '@/lib/types/mafia';
+import { MafiaRoom, ROLE_TABLE, Role, ROLE_LABEL, ROLE_ICON, getRolesForCount } from '@/lib/types/mafia';
 import { Button } from '@/components/ui/Button';
 import { LobbyPlayerList } from '@/components/shared/LobbyPlayerList';
 import { CountdownTimer } from '@/components/shared/CountdownTimer';
-import { startGame, leaveRoom } from '@/lib/firestore/mafia';
+import { startGame, leaveRoom, updateCustomRoles } from '@/lib/firestore/mafia';
 import { useRouter } from 'next/navigation';
 
 interface Props { room: MafiaRoom; playerId: string; }
@@ -39,13 +39,7 @@ function DecryptCode({ code }: { code: string }) {
   );
 }
 
-const ROLE_ROWS: { count: number; roles: string }[] = [
-  { count: 6,  roles: 'Boss, Mafijaš, Policajac, Doktor, 2× Civil' },
-  { count: 7,  roles: 'Boss, Mafijaš, Policajac, Doktor, Osvetnik, 2× Civil' },
-  { count: 8,  roles: '+ Dama' },
-  { count: 10, roles: '+ još 1 Mafijaš' },
-  { count: 12, roles: '+ još Civili' },
-];
+const ROLES: Role[] = ['mafia-boss', 'mafia', 'dama', 'policajac', 'doktor', 'osvetnik', 'civil'];
 
 export function LobbyScreen({ room, playerId }: Props) {
   const router = useRouter();
@@ -54,10 +48,34 @@ export function LobbyScreen({ room, playerId }: Props) {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [showRoles, setShowRoles] = useState(false);
 
+  const [localRoles, setLocalRoles] = useState<Record<Role, number> | null>(null);
+
   const isHost = room.hostId === playerId;
   const playerList = Object.values(room.players);
   const playerCount = playerList.length;
-  const canStart = playerCount >= 6;
+
+  const defaultRoleArray = getRolesForCount(Math.max(6, playerCount));
+  const defaultRoles = {} as Record<Role, number>;
+  defaultRoleArray.forEach(r => defaultRoles[r] = (defaultRoles[r] || 0) + 1);
+
+  const baseRoles = room.settings.customRoles;
+  const activeRoles = localRoles || baseRoles || defaultRoles;
+  const totalSelected = Object.values(activeRoles).reduce((a, b) => a + b, 0);
+  const isValidCustomRoles = totalSelected === playerCount;
+
+  const canStart = playerCount >= 6 && (!baseRoles || Object.values(baseRoles).reduce((a,b)=>a+b,0) === playerCount) && !localRoles;
+
+  const handleUpdateRole = (role: Role, delta: number) => {
+    if (!isHost) return;
+    const newRoles = { ...activeRoles };
+    newRoles[role] = Math.max(0, (newRoles[role] || 0) + delta);
+    setLocalRoles(newRoles);
+  };
+
+  const handleSaveRoles = async () => {
+    await updateCustomRoles(room.code, localRoles);
+    setLocalRoles(null);
+  };
 
   const handleStart = useCallback(() => { setStarting(true); setCountdown(3); }, []);
 
@@ -153,17 +171,48 @@ export function LobbyScreen({ room, playerId }: Props) {
                 exit={{ opacity: 0, height: 0 }}
                 className="overflow-hidden"
               >
-                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                  {Object.entries(ROLE_TABLE).slice(0, 5).map(([cnt, roles], i) => (
-                    <div key={cnt}
-                      className="flex items-start gap-3 px-4 py-2.5"
-                      style={{ borderTop: i > 0 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                      <span className="shrink-0 text-[10px] font-bold text-red-400/70 w-5">{cnt}</span>
-                      <span className="text-[10px] text-slate-500 leading-relaxed">{roles.join(', ')}</span>
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 flex flex-col gap-3">
+                  {ROLES.map(role => (
+                    <div key={role} className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[14px]">{ROLE_ICON[role]}</span>
+                        <span className="text-[12px] text-slate-300 font-medium">{ROLE_LABEL[role]}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {isHost && (
+                          <button 
+                            onClick={() => handleUpdateRole(role, -1)}
+                            className="w-6 h-6 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-white/70 flex items-center justify-center text-[14px] cursor-pointer"
+                          >-</button>
+                        )}
+                        <span className="text-[14px] font-bold text-white w-4 text-center">
+                          {activeRoles[role] || 0}
+                        </span>
+                        {isHost && (
+                          <button 
+                            onClick={() => handleUpdateRole(role, 1)}
+                            className="w-6 h-6 rounded-full bg-white/[0.05] hover:bg-white/[0.1] text-white/70 flex items-center justify-center text-[14px] cursor-pointer"
+                          >+</button>
+                        )}
+                      </div>
                     </div>
                   ))}
+                  
+                  {/* Summary / Save */}
+                  <div className="mt-2 pt-3 border-t border-white/[0.06] flex items-center justify-between">
+                    <span className={`text-[11px] ${isValidCustomRoles ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      Ukupno: {totalSelected} / {playerCount}
+                    </span>
+                    {isHost && localRoles && (
+                      <button 
+                        onClick={handleSaveRoles}
+                        className="text-[11px] px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 cursor-pointer"
+                      >
+                        Sačuvaj
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[9px] text-slate-600 mt-2 text-center">* 13–14 igrača: dodaju se Civili</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -188,7 +237,7 @@ export function LobbyScreen({ room, playerId }: Props) {
                 boxShadow: canStart ? '0 4px 16px rgba(220,38,38,0.4)' : undefined,
               }}
             >
-              {starting ? 'Pokretanje...' : canStart ? 'Pokreni igru' : `Potrebno minimalno 6 igrača`}
+              {starting ? 'Pokretanje...' : canStart ? 'Pokreni igru' : (localRoles ? 'Sačuvaj uloge prvo' : (playerCount < 6 ? 'Potrebno minimalno 6 igrača' : 'Broj uloga se ne poklapa'))}
             </Button>
           )}
           <Button variant="ghost" fullWidth onClick={handleLeave} className="!rounded-2xl">

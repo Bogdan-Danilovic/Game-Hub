@@ -14,7 +14,9 @@ import {
   MafiaPlayer,
   MafiaSettings,
   MafiaStatus,
+  Role,
   getRolesForCount,
+  customRolesToArray,
 } from '@/lib/types/mafia';
 import { generateRoomCode, generatePlayerId, shuffleArray } from '@/lib/utils';
 import { roomRef } from './core';
@@ -144,7 +146,15 @@ export async function startGame(code: string) {
     const playerIds = Object.keys(room.players);
     if (playerIds.length < 6) throw new Error('Treba bar 6 igrača.');
 
-    const roles = getRolesForCount(playerIds.length);
+    let roles: Role[];
+    if (room.settings.customRoles) {
+      roles = customRolesToArray(room.settings.customRoles);
+      if (roles.length !== playerIds.length) {
+        throw new Error('Broj odabranih uloga ne odgovara broju igrača.');
+      }
+    } else {
+      roles = getRolesForCount(playerIds.length);
+    }
     shuffleArray(roles);
 
     playerIds.forEach((id, index) => {
@@ -169,6 +179,12 @@ export async function setSeenRole(code: string, playerId: string) {
 
 export async function advanceToPlaying(code: string) {
   await updateDoc(roomRef(code), { status: 'playing' });
+}
+
+export async function updateCustomRoles(code: string, customRoles: Record<Role, number> | null) {
+  await updateDoc(roomRef(code), {
+    'settings.customRoles': customRoles,
+  });
 }
 
 export async function killPlayer(code: string, targetId: string) {
