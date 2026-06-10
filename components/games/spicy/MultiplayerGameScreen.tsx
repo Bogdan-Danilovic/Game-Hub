@@ -11,7 +11,7 @@ import { playCard, passTurn, challengePlay, voteNoChallenge, confirmChallengeRes
 import { SpicyCardComponent } from '@/components/games/spicy/SpicyCard';
 import { SpiceChip, SPICE_CFG } from '@/components/games/spicy/SpiceChip';
 import { Button } from '@/components/shared/Button';
-import { X, CheckCircle, Home, RotateCcw } from 'lucide-react';
+import { X, CheckCircle, Home } from 'lucide-react';
 
 const SPICES: Spice[] = ['chili', 'wasabi', 'pepper'];
 const VALUES = Array.from({ length: 10 }, (_, i) => i + 1);
@@ -265,7 +265,7 @@ export function SpicyMultiplayerGameScreen({ room, playerId }: Props) {
               </div>
             ))}
           </div>
-          <Button fullWidth onClick={() => confirmChallengeResult(room.code, playerId)}
+          <Button fullWidth onClick={() => confirmChallengeResult(room.code)}
             style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', boxShadow: '0 4px 16px rgba(239,68,68,0.4)' }}>
             Nastavi
           </Button>

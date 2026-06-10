@@ -10,7 +10,6 @@ import { Button } from '@/components/shared/Button';
 import {
   drawCard, swapAndDiscard, discardDirectly, callCambio,
 } from '@/lib/firestore/cambio';
-import { getCardValue } from './constants';
 import { getAiAction } from './ai';
 import { hexA } from '@/lib/utils';
 
@@ -126,7 +125,7 @@ export function GameScreen({ room, playerId, isHost }: Props) {
 
       {/* Opponent hands */}
       <div className="flex flex-col gap-2 px-4 py-2">
-        {room.players.filter((_, i) => i !== playerIndex).map((opp, oi) => {
+        {room.players.filter((_, i) => i !== playerIndex).map((opp) => {
           const isTheirTurn = room.players.findIndex(p => p.id === opp.id) === room.currentPlayerIndex;
           return (
             <div key={opp.id} className="flex items-center gap-3 rounded-2xl px-3 py-2"

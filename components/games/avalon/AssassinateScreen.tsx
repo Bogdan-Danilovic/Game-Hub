@@ -5,15 +5,12 @@ import { motion } from 'framer-motion';
 import { AvalonRoom } from '@/lib/types/avalon';
 import { castAssassinVote, resolveAssassination } from '@/lib/firestore/avalon';
 import { Button } from '@/components/shared/Button';
-import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AvalonRoom;
   playerId: string;
 }
 
-const ACCENT = '#7c3aed';
-const ACCENT2 = '#8b5cf6';
 
 export function AssassinateScreen({ room, playerId }: Props) {
   const [submitting, setSubmitting] = useState(false);

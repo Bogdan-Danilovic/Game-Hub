@@ -1,22 +1,20 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { useState } from 'react';
 
 const COUNT = 30;
 
 export function Particles() {
-  const dots = useMemo(
-    () =>
-      Array.from({ length: COUNT }, (_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 3 + 1,
-        duration: Math.random() * 20 + 15,
-        delay: Math.random() * 10,
-      })),
-    [],
+  const [dots] = useState(() =>
+    Array.from({ length: COUNT }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 20 + 15,
+      delay: Math.random() * 10,
+    })),
   );
 
   return (

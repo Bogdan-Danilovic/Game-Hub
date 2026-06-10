@@ -1,4 +1,4 @@
-import { BasePlayer, BaseRoom, GameSettings } from './core';
+import { BasePlayer, BaseRoom } from './core';
 
 export type { RoomStatus } from './core';
 
@@ -14,7 +14,9 @@ export interface CambioCard {
   knownBy: string[];
 }
 
-export interface CambioPlayer extends BasePlayer {  isAI?: boolean;  cards: CambioCard[];
+export interface CambioPlayer extends BasePlayer {
+  isAI?: boolean;
+  cards: CambioCard[];
   penaltyCount: number;
   finalScore: number;
 }
@@ -44,7 +46,8 @@ export type CambioStatus =
   | 'finished';
 
 export interface CambioRoom extends BaseRoom {
-  gameType: 'cambio';  expiresAt: number;
+  gameType: 'cambio';
+  expiresAt: number;
   players: CambioPlayer[];
   settings: Record<string, unknown>;
   drawPile: CambioCard[];

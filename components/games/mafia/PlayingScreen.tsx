@@ -1,14 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { MafiaRoom, ROLE_LABEL, ROLE_ICON, ROLE_TEAM } from '@/lib/types/mafia';
 import { killPlayer, finishGame } from '@/lib/firestore/mafia';
 import { Button } from '@/components/shared/Button';
 
 interface Props { room: MafiaRoom; playerId: string; }
 
-const ACCENT = '#dc2626';
 
 export function PlayingScreen({ room, playerId }: Props) {
   const isHost = room.hostId === playerId;

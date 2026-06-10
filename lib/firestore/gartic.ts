@@ -1,7 +1,6 @@
 'use client';
 
-import { arrayUnion, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { arrayUnion, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { Book, BookEntry, GarticPlayer, GarticRoom, GarticStroke } from '@/lib/types/gartic';
 import { generatePlayerId, generateRoomCode } from '@/lib/utils';
 import { roomRef, subscribeToRoom } from './core';

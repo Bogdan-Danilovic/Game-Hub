@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import { PartialStroke, Stroke } from '@/lib/types/drawing';
+import { Stroke } from '@/lib/types/drawing';
 import { commitStroke, pushPartialStroke } from '@/lib/firestore/drawing';
 
 const FLUSH_INTERVAL = 150;

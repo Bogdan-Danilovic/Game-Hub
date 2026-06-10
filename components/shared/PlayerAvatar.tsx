@@ -30,6 +30,7 @@ export function PlayerAvatar({ name, avatar, color, size = 'md' }: Props) {
       transition={{ type: 'spring', stiffness: 300, damping: 20 }}
     >
       {avatar ? (
+        // eslint-disable-next-line @next/next/no-img-element -- avatar URL dolazi sa proizvoljnog auth providera; next/image bi pukao za domen van remotePatterns liste
         <img
           src={avatar}
           alt={name}

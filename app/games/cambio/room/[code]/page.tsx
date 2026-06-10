@@ -1,9 +1,10 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CambioRoom } from '@/lib/types/cambio';
 import { useRoom } from '@/hooks/useRoom';
+import { useMounted } from '@/hooks/useMounted';
 import { usePlayer } from '@/hooks/usePlayer';
 import { usePresence } from '@/hooks/usePresence';
 import { setPlayerDisconnected, rejoinRoom } from '@/lib/firestore/cambio';
@@ -20,9 +21,7 @@ export default function RoomPage({ params }: Props) {
   const router = useRouter();
   const { id: playerId } = usePlayer();
   const { room, loading, error } = useRoom<CambioRoom>(code);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => { setMounted(true); }, []);
+  const mounted = useMounted();
 
   usePresence(code, playerId, setPlayerDisconnected, rejoinRoom);
 

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { usePrefilledName } from '@/hooks/usePrefilledName';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Clock } from 'lucide-react';
@@ -36,12 +37,8 @@ const shake = {
 export function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const [name, setName] = useState('');
+  const [name, setName] = usePrefilledName(profile?.displayName);
 
-  useEffect(() => {
-    if (profile?.displayName && name === '') setName(profile.displayName);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.displayName]);
   const [roomCode, setRoomCode] = useState('');
   const [error, setError] = useState('');
   const [errorKey, setErrorKey] = useState(0);

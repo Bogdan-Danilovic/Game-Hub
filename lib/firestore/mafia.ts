@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  getDoc,
   setDoc,
   updateDoc,
   runTransaction,
@@ -13,7 +12,6 @@ import {
   MafiaRoom,
   MafiaPlayer,
   MafiaSettings,
-  MafiaStatus,
   Role,
   getRolesForCount,
   customRolesToArray,
@@ -129,7 +127,7 @@ export async function setPlayerDisconnected(code: string, playerId: string): Pro
     await updateDoc(roomRef(code), {
       [`players.${playerId}.isConnected`]: false,
     });
-  } catch (e) {
+  } catch {
     // ignore
   }
 }

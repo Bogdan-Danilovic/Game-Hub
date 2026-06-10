@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Stroke, PartialStroke } from '@/lib/types/drawing';
 
 interface DrawingCanvasProps {
@@ -76,7 +76,7 @@ export function DrawingCanvas({
     return () => ro.disconnect();
   }, []);
 
-  const redraw = useCallback(() => {
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || dims.w === 0) return;
     const ctx = canvas.getContext('2d');
@@ -100,10 +100,6 @@ export function DrawingCanvas({
       drawStroke(ctx, localPartialPoints, localPartialColor, localPartialWidth, localPartialTool, dims.w, dims.h);
     }
   }, [strokes, currentStroke, localPartialPoints, localPartialColor, localPartialWidth, localPartialTool, dims, canvasRef]);
-
-  useEffect(() => {
-    redraw();
-  }, [redraw]);
 
   const cursor = isDrawer ? 'crosshair' : 'default';
 

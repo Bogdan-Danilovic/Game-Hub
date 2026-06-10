@@ -35,7 +35,7 @@ export function GameOverScreen({ room, playerId }: Props) {
       gameKey: `${room.code}_${room.createdAt}`,
       playerNames: room.players.map((p) => p.name),
     }).catch((e) => console.error('[stats] flip7', e));
-  }, [user]);
+  }, [user, playerId, room.code, room.createdAt, room.hostId, room.players, room.winnerId]);
 
   const isHost = room.hostId === playerId;
   const winner = room.players.find((p) => p.id === room.winnerId);

@@ -4,7 +4,6 @@ import {
   arrayUnion,
   getDoc,
   runTransaction,
-  serverTimestamp,
   setDoc,
   updateDoc,
 } from 'firebase/firestore';
@@ -18,7 +17,7 @@ import {
   Stroke,
 } from '@/lib/types/drawing';
 import { generatePlayerId, generateRoomCode, shuffleArray } from '@/lib/utils';
-import { buildWordHint, getRandomWords } from '@/lib/prompts/drawing-words';
+import { buildWordHint } from '@/lib/prompts/drawing-words';
 import { roomRef, subscribeToRoom } from './core';
 
 export { subscribeToRoom };

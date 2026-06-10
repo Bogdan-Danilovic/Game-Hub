@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserAvatar } from './UserAvatar';
 import { Login1 } from '@/components/ui/login-1';
@@ -9,9 +9,8 @@ export function AuthHeaderSlot() {
   const { isLoggedIn } = useAuth();
   const [loginOpen, setLoginOpen] = useState(false);
 
-  useEffect(() => {
-    if (isLoggedIn) setLoginOpen(false);
-  }, [isLoggedIn]);
+  // Zatvori modal cim se korisnik uloguje (adjust-during-render)
+  if (isLoggedIn && loginOpen) setLoginOpen(false);
 
   if (isLoggedIn) {
     return <UserAvatar size={32} />;

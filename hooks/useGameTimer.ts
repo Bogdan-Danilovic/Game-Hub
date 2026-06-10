@@ -6,25 +6,23 @@ export function useGameTimer(
   roundStartedAt: number,
   roundDuration: number
 ): { secondsLeft: number; progress: number } {
-  const [secondsLeft, setSecondsLeft] = useState(roundDuration / 1000);
+  // Drzimo "sat" u state-u, a preostalo vreme racunamo tokom rendera —
+  // tako nema setState poziva sinhrono u efektu.
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    if (!roundStartedAt) {
-      setSecondsLeft(roundDuration / 1000);
-      return;
-    }
-
-    function tick() {
-      const elapsed = (Date.now() - roundStartedAt) / 1000;
-      const remaining = Math.max(0, roundDuration / 1000 - elapsed);
-      setSecondsLeft(Math.ceil(remaining));
-    }
-
-    tick();
-    const id = setInterval(tick, 500);
+    if (!roundStartedAt) return;
+    const id = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(id);
-  }, [roundStartedAt, roundDuration]);
+  }, [roundStartedAt]);
 
-  const progress = secondsLeft / (roundDuration / 1000);
+  const totalSeconds = roundDuration / 1000;
+  // elapsed klampujemo na 0 jer `now` moze biti stariji od starta runde
+  const elapsed = roundStartedAt ? Math.max(0, (now - roundStartedAt) / 1000) : 0;
+  const secondsLeft = roundStartedAt
+    ? Math.ceil(Math.max(0, totalSeconds - elapsed))
+    : totalSeconds;
+
+  const progress = secondsLeft / totalSeconds;
   return { secondsLeft, progress };
 }

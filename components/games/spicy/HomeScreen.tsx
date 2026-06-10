@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { usePrefilledName } from '@/hooks/usePrefilledName';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Clock } from 'lucide-react';
@@ -31,16 +32,12 @@ const RULES = [
 export function SpicyHomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const [name, setName] = useState('');
+  const [name, setName] = usePrefilledName(profile?.displayName);
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [errKey, setErrKey] = useState(0);
   const [loading, setLoading] = useState<'create' | 'join' | null>(null);
 
-  useEffect(() => {
-    if (profile?.displayName && !name) setName(profile.displayName);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.displayName]);
 
   const NAME_RE = /^[\p{L}\p{N} ]+$/u;
   const trimName = name.trim();

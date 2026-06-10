@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MafiaRoom, ROLE_TABLE, Role, ROLE_LABEL, ROLE_ICON, getRolesForCount } from '@/lib/types/mafia';
+import { MafiaRoom, Role, ROLE_LABEL, ROLE_ICON, getRolesForCount } from '@/lib/types/mafia';
 import { Button } from '@/components/shared/Button';
 import { LobbyPlayerList } from '@/components/shared/LobbyPlayerList';
 import { CountdownTimer } from '@/components/shared/CountdownTimer';
@@ -14,25 +14,29 @@ interface Props { room: MafiaRoom; playerId: string; }
 const ACCENT = '#dc2626';
 const ACCENT2 = '#ef4444';
 
+const SCRAMBLE_CHARS = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
+const scrambleCode = (code: string) =>
+  code.split('').map(() => SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]);
+
 function DecryptCode({ code }: { code: string }) {
   const [revealed, setRevealed] = useState(0);
-  const chars = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
-  const charsRef = useRef<string[]>(
-    code.split('').map(() => chars[Math.floor(Math.random() * chars.length)])
-  );
+  const [scramble, setScramble] = useState(() => scrambleCode(code));
 
   useEffect(() => {
     if (revealed >= code.length) return;
-    const t = setTimeout(() => setRevealed((r) => r + 1), 110);
+    const t = setTimeout(() => {
+      setRevealed((r) => r + 1);
+      setScramble(scrambleCode(code));
+    }, 110);
     return () => clearTimeout(t);
-  }, [revealed, code.length]);
+  }, [revealed, code]);
 
   return (
     <span className="inline-flex tracking-[0.4em]">
       {code.split('').map((char, i) => (
         <motion.span key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className={i < revealed ? 'text-red-400' : 'text-slate-600'}>
-          {i < revealed ? char : charsRef.current[i]}
+          {i < revealed ? char : scramble[i]}
         </motion.span>
       ))}
     </span>

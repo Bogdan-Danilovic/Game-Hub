@@ -28,7 +28,6 @@ export function DrawingScreen({ room, playerId }: Props) {
   const [clearCount, setClearCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const submittedRef = useRef(false);
-  const canvasElRef = useRef<HTMLCanvasElement | null>(null);
   const { secondsLeft, progress } = useGameTimer(room.stepStartedAt, room.stepDuration);
   const timerColor = secondsLeft > 45 ? '#22c55e' : secondsLeft > 15 ? ACCENT : '#ef4444';
 

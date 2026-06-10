@@ -81,10 +81,9 @@ export function GameOverScreen({ room, playerId }: Props) {
       gameKey: `${room.code}_${room.createdAt}`,
       playerNames: room.players.map((p) => p.name),
     }).catch((e) => console.error('[stats] alias', e));
-  }, [user, winner, isWinner]);
+  }, [user, winner, isWinner, playerId, room.code, room.createdAt, room.hostId, room.players]);
 
   const winnerAccent = winner === 'a' ? ACCENT_A : winner === 'b' ? ACCENT_B : null;
-  const winnerAccent2 = winner === 'a' ? ACCENT_A2 : winner === 'b' ? ACCENT_B : null;
   const winnerLabel = winner === 'a' ? 'Tim A pobjeđuje!' : winner === 'b' ? 'Tim B pobjeđuje!' : null;
 
   async function handleLeave() {

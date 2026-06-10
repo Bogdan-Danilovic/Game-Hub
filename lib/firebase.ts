@@ -20,7 +20,5 @@ const app =
       : getApps()[0]
     : null;
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const db = app ? getFirestore(app) : (null as unknown as ReturnType<typeof getFirestore>);
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 export const auth = app ? getAuth(app) : (null as unknown as ReturnType<typeof getAuth>);
