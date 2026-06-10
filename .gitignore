@@ -81,3 +81,6 @@ skills-lock.json
 *.pyc
 .vercel
 .env*
+
+# Windows env-var path accidentally committed by tooling
+%USERPROFILE%/
