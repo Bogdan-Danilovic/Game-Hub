@@ -197,11 +197,18 @@ function GameHistorySection({ uid }: { uid: string }) {
   const [games, setGames] = useState<GameHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevUid, setPrevUid] = useState(uid);
+
+  // Reset pri promeni korisnika (adjust-during-render)
+  if (prevUid !== uid) {
+    setPrevUid(uid);
+    setGames([]);
+    setLoading(true);
+    setError(null);
+  }
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError(null);
     const q = query(
       collection(db, 'gameHistory', uid, 'games'),
       orderBy('playedAt', 'desc'),

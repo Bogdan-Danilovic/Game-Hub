@@ -8,7 +8,7 @@ import { createInitialState, spicyReducer } from '@/lib/games/spicy/gameEngine';
 import { PlayingScreen } from '@/components/games/spicy/PlayingScreen';
 import { ChallengeModal, ChallengeResultModal, TrophyModal } from '@/components/games/spicy/Modals';
 import { SpicyScoreBoard } from '@/components/games/spicy/ScoreBoard';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { setups: SpicyPlayerSetup[]; }
 

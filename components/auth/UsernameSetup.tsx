@@ -27,11 +27,15 @@ export function UsernameSetup() {
     }
   }, []);
 
+  // Vrati status na idle cim unos postane nevalidan (adjust-during-render)
+  const [prevValue, setPrevValue] = useState(value);
+  if (prevValue !== value) {
+    setPrevValue(value);
+    if (!USERNAME_RE.test(value)) setStatus('idle');
+  }
+
   useEffect(() => {
-    if (!USERNAME_RE.test(value)) {
-      setStatus('idle');
-      return;
-    }
+    if (!USERNAME_RE.test(value)) return;
     const id = setTimeout(() => void checkUniqueness(value), 500);
     return () => clearTimeout(id);
   }, [value, checkUniqueness]);

@@ -7,7 +7,7 @@ import { AvalonRoom } from '@/lib/types/avalon';
 import { playAgain, leaveRoom } from '@/lib/firestore/avalon';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 interface Props {
@@ -55,7 +55,7 @@ export function GameOverScreen({ room, playerId }: Props) {
       gameKey: `${room.code}_${room.createdAt}`,
       playerNames: room.players.map((p) => p.name),
     }).catch((e) => console.error('[stats] avalon', e));
-  }, [user, room.winner]);
+  }, [user, room.winner, playerId, room.code, room.createdAt, room.hostId, room.players]);
 
   const isHost = room.hostId === playerId;
   const goodWon = room.winner === 'good';

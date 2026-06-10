@@ -36,9 +36,15 @@ export function LeaderboardTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Reset pri promeni filtera (adjust-during-render)
+  const [prevFilter, setPrevFilter] = useState(filter);
+  if (prevFilter !== filter) {
+    setPrevFilter(filter);
     setLoading(true);
     setError(null);
+  }
+
+  useEffect(() => {
     const unsub = subscribeLeaderboard(
       filter,
       (data) => {

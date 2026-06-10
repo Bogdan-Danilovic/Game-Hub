@@ -5,7 +5,7 @@ import { db } from '@/lib/firebase';
 import { UnoRoom, UnoPlayer, UnoSettings, UnoColor, UnoCard } from '@/lib/types/uno';
 import { generateRoomCode, generatePlayerId } from '@/lib/utils';
 import { createShuffledUnoDeck, drawCards } from '@/lib/games/uno/deck';
-import { nextIndex, handScore, canPlayCard, colorFromTop } from '@/lib/games/uno/engine';
+import { nextIndex, handScore, canPlayCard } from '@/lib/games/uno/engine';
 import { roomRef, subscribeToRoom } from './core';
 
 export { subscribeToRoom };

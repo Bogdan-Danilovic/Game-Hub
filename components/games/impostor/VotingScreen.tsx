@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImpostorRoom } from '@/lib/types/impostor';
 import { castVote, processVotes } from '@/lib/firestore/impostor';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props {
   room: ImpostorRoom;
@@ -16,7 +16,8 @@ const ACCENT2 = '#ef4444';
 
 export function VotingScreen({ room, playerId }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
-  const [hasVoted, setHasVoted] = useState(false);
+  // Optimistic flag so the UI locks immediately; the source of truth is room.votes
+  const [votePending, setVotePending] = useState(false);
   const [processing, setProcessing] = useState(false);
 
   const isHost = room.hostId === playerId;
@@ -26,16 +27,15 @@ export function VotingScreen({ room, playerId }: Props) {
   const totalAlive = alivePlayers.length;
   const totalVoted = Object.keys(room.votes).length;
   const allVoted = totalVoted >= totalAlive;
+  const hasVoted = votePending || playerId in room.votes;
 
+  // Auto-advance when all votes are in — host triggers processing.
+  // Ref umesto state-a: guard ne utice na render, pa nema setState u efektu.
+  const autoProcessing = useRef(false);
   useEffect(() => {
-    if (playerId in room.votes) setHasVoted(true);
-  }, [playerId, room.votes]);
-
-  // Auto-advance when all votes are in — host triggers processing
-  useEffect(() => {
-    if (allVoted && isHost && !processing) {
-      setProcessing(true);
-      processVotes(room.code).finally(() => setProcessing(false));
+    if (allVoted && isHost && !autoProcessing.current) {
+      autoProcessing.current = true;
+      processVotes(room.code).finally(() => { autoProcessing.current = false; });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allVoted]);
@@ -43,14 +43,14 @@ export function VotingScreen({ room, playerId }: Props) {
   async function handleVote(id: string) {
     if (hasVoted || !isAlive) return;
     setSelected(id);
-    setHasVoted(true);
+    setVotePending(true);
     await castVote(room.code, playerId, id);
   }
 
   async function handleSkip() {
     if (hasVoted || !isAlive) return;
     setSelected('skip');
-    setHasVoted(true);
+    setVotePending(true);
     await castVote(room.code, playerId, 'skip');
   }
 

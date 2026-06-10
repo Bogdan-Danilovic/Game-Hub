@@ -1,8 +1,7 @@
 import { BasePlayer, BaseRoom } from './core';
 
-export interface GarticPlayer extends BasePlayer {
-  // No extra fields needed beyond BasePlayer
-}
+// Gartic ne dodaje polja preko BasePlayer
+export type GarticPlayer = BasePlayer;
 
 export interface GarticStroke {
   points: [number, number][];

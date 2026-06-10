@@ -1,6 +1,6 @@
 'use client';
 
-import { doc, getDoc, setDoc, updateDoc, runTransaction } from 'firebase/firestore';
+import { getDoc, setDoc, updateDoc, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { CambioRoom, CambioPlayer, CambioCard, ActivePower } from '@/lib/types/cambio';
 import { generatePlayerId, generateRoomCode } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { createDeck, dealCards, reshuffleDiscardIntoDraw } from '@/components/ga
 import { getCardPower } from '@/components/games/cambio/constants';
 import { computeScores } from '@/components/games/cambio/scoring';
 
-import { roomRef, subscribeToRoom } from './core';
+import { roomRef } from './core';
 
 function newRoom(code: string, hostId: string, player: CambioPlayer): CambioRoom {
   return {
@@ -137,7 +137,7 @@ export async function startGame(code: string): Promise<void> {
   const deck = createDeck();
   const { hands, remaining } = dealCards(deck, room.players.length);
 
-  let drawPile = remaining;
+  const drawPile = remaining;
   const discardTop = drawPile.pop()!;
   const discardPile: CambioCard[] = [{ ...discardTop, knownBy: [] }];
 
@@ -463,7 +463,7 @@ export async function trySnap(code: string, playerId: string, cardIndex: number)
       // Wrong snap — penalty card
       const penaltyCard: CambioCard = { rank: 'A', suit: '♠', knownBy: [] };
       let drawPile = [...room.drawPile];
-      let discardPile = [...room.discardPile];
+      const discardPile = [...room.discardPile];
       if (drawPile.length > 0) {
         const penalty = { ...drawPile[drawPile.length - 1], knownBy: [] };
         drawPile = drawPile.slice(0, -1);

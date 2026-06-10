@@ -1,21 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 interface PlayerIdentity {
   id: string | null;
   name: string | null;
 }
 
+// localStorage se ne menja spolja tokom sesije — dovoljan je no-op subscribe
+const subscribe = () => () => {};
+
 export function usePlayer(): PlayerIdentity {
-  const [identity, setIdentity] = useState<PlayerIdentity>({ id: null, name: null });
+  const id = useSyncExternalStore(
+    subscribe,
+    () => localStorage.getItem('playerId'),
+    () => null
+  );
+  const name = useSyncExternalStore(
+    subscribe,
+    () => localStorage.getItem('playerName'),
+    () => null
+  );
 
-  useEffect(() => {
-    setIdentity({
-      id: localStorage.getItem('playerId'),
-      name: localStorage.getItem('playerName'),
-    });
-  }, []);
-
-  return identity;
+  return { id, name };
 }

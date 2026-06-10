@@ -5,14 +5,13 @@ import {
   setDoc,
   updateDoc,
   runTransaction,
-  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { ImpostorRoom, ImpostorPlayer, GameMode, Category, ImpostorSettings } from '@/lib/types/impostor';
 import { generateRoomCode, generatePlayerId, selectImpostors, getImpostorCount, tallyVotes, checkWinCondition } from '@/lib/utils';
 import { getRandomPrompt } from '@/lib/prompts/index';
 
-import { roomRef, subscribeToRoom } from './core';
+import { roomRef } from './core';
 
 function newRoom(code: string, hostId: string, player: ImpostorPlayer): ImpostorRoom {
   return {

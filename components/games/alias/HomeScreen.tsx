@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { usePrefilledName } from '@/hooks/usePrefilledName';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/shared/Button';
+import { Input } from '@/components/shared/Input';
 import { GameIcon } from '@/components/GameIcon';
 import { createRoom, joinRoom } from '@/lib/firestore/alias';
 import { getGameById } from '@/lib/games/registry';
@@ -37,12 +38,8 @@ const shake = {
 export function HomeScreen() {
   const router = useRouter();
   const { profile } = useAuth();
-  const [name, setName] = useState('');
+  const [name, setName] = usePrefilledName(profile?.displayName);
 
-  useEffect(() => {
-    if (profile?.displayName && name === '') setName(profile.displayName);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.displayName]);
   const [roomCode, setRoomCode] = useState('');
   const [error, setError] = useState('');
   const [errorKey, setErrorKey] = useState(0);

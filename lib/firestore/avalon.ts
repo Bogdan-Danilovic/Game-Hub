@@ -562,7 +562,7 @@ export async function playAgain(code: string): Promise<void> {
   });
 }
 
-export async function useLadyOfTheLake(
+export async function applyLadyOfTheLake(
   code: string,
   holderId: string,
   investigatedId: string,
@@ -620,6 +620,7 @@ export async function setPlayerDisconnected(
 
     if (room.status !== 'lobby') {
       const connected = players.filter((p) => p.isConnected);
+      // Avalon minimum je 5 igraca (ne platformskih 3) — ispod toga igra nije igriva
       if (connected.length < 5) {
         updates.status = 'finished';
         updates.winner = null;
@@ -658,6 +659,7 @@ export async function leaveRoom(code: string, playerId: string): Promise<void> {
       }
 
       const connected = players.filter((p) => p.isConnected);
+      // Avalon minimum je 5 igraca (ne platformskih 3) — ispod toga igra nije igriva
       if (connected.length < 5) {
         updates.status = 'finished';
         updates.winner = null;

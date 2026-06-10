@@ -16,15 +16,14 @@ interface Props {
 }
 
 export function SpecialPowerModal({ room, playerId }: Props) {
-  const rawPower = room.activePower;
-  if (!rawPower) return null;
-  const playerIndex = room.players.findIndex(p => p.id === playerId);
-  if (rawPower.sourcePlayerIndex !== playerIndex) return null;
-  const power = rawPower;
-
   const [selectedMy, setSelectedMy] = useState<number | null>(null);
   const [selectedOppPlayer, setSelectedOppPlayer] = useState<number | null>(null);
   const [selectedOppCard, setSelectedOppCard] = useState<number | null>(null);
+
+  const rawPower = room.activePower;
+  const playerIndex = room.players.findIndex(p => p.id === playerId);
+  if (!rawPower || rawPower.sourcePlayerIndex !== playerIndex) return null;
+  const power = rawPower;
 
   const myPlayer = room.players[playerIndex];
 
@@ -103,7 +102,7 @@ export function SpecialPowerModal({ room, playerId }: Props) {
         {/* peek_opponent */}
         {power.type === 'peek_opponent' && (
           <div className="flex flex-col gap-3">
-            {opponents.map((opp, oi) => {
+            {opponents.map((opp) => {
               const realOppIndex = room.players.findIndex(p => p.id === opp.id);
               return (
                 <div key={opp.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">

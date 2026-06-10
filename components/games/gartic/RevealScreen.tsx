@@ -149,6 +149,7 @@ function BookGrid({ room, playerIds, isHost }: { room: GarticRoom; playerIds: st
                 whileTap={isHost ? { scale: 0.97 } : {}}>
                 <div className="h-[90px] bg-white flex items-center justify-center overflow-hidden">
                   {thumb
+                    // eslint-disable-next-line @next/next/no-img-element -- thumb je canvas data-URL; next/image ga ne optimizuje
                     ? <img src={thumb} alt="thumbnail" className="w-full h-full object-cover" />
                     : <span className="text-[32px]">📞</span>
                   }

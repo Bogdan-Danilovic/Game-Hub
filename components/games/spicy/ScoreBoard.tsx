@@ -6,7 +6,7 @@ import { RotateCcw, Home } from 'lucide-react';
 import { SpicyPlayer } from '@/lib/games/spicy/types';
 import { buildScoreboard } from '@/lib/games/spicy/scoring';
 import { SpicyAction } from '@/lib/games/spicy/gameEngine';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { players: SpicyPlayer[]; winner: SpicyPlayer | null; dispatch: (a: SpicyAction) => void; }
 

@@ -1,22 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { GoogleSignInButton } from './GoogleSignInButton';
 
 const STORAGE_KEY = 'guest_banner_dismissed';
+const subscribe = () => () => {};
 
 export function GuestBanner() {
   const { isGuest } = useAuth();
-  const [dismissed, setDismissed] = useState(true);
-
-  useEffect(() => {
-    setDismissed(localStorage.getItem(STORAGE_KEY) === 'true');
-  }, []);
+  // Na serveru se ponasa kao dismissed da banner ne bljesne pre hidratacije
+  const storedDismissed = useSyncExternalStore(
+    subscribe,
+    () => localStorage.getItem(STORAGE_KEY) === 'true',
+    () => true
+  );
+  const [dismissedNow, setDismissedNow] = useState(false);
+  const dismissed = dismissedNow || storedDismissed;
 
   const dismiss = () => {
     localStorage.setItem(STORAGE_KEY, 'true');
-    setDismissed(true);
+    setDismissedNow(true);
   };
 
   if (!isGuest || dismissed) return null;

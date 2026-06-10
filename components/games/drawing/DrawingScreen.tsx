@@ -35,7 +35,12 @@ export function DrawingScreen({ room, playerId }: Props) {
   const [localPartial, setLocalPartial] = useState<[number, number][] | undefined>(undefined);
   const hasEndedRef = useRef(false);
 
-  useEffect(() => { setLocalStrokes(room.strokes); }, [room.strokes]);
+  // Sinhronizuj lokalne poteze sa serverskim (adjust-during-render)
+  const [prevStrokes, setPrevStrokes] = useState(room.strokes);
+  if (prevStrokes !== room.strokes) {
+    setPrevStrokes(room.strokes);
+    setLocalStrokes(room.strokes);
+  }
 
   useEffect(() => {
     if (secondsLeft === 0 && !hasEndedRef.current && isDrawer) {

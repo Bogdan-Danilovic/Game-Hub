@@ -21,11 +21,15 @@ export function OnlineFriends() {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [now, setNow] = useState(() => Date.now());
 
+  // Ocisti redove kad se lista prijatelja promeni (adjust-during-render)
+  const [prevFriendsKey, setPrevFriendsKey] = useState(friendsKey);
+  if (prevFriendsKey !== friendsKey) {
+    setPrevFriendsKey(friendsKey);
+    setRows([]);
+  }
+
   useEffect(() => {
-    if (friends.length === 0) {
-      setRows([]);
-      return;
-    }
+    if (friends.length === 0) return;
     const unsub = subscribeFriendProfiles(friends, setRows, () => setRows([]));
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps

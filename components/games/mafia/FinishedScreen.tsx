@@ -7,7 +7,7 @@ import { MafiaRoom, ROLE_LABEL, ROLE_ICON, ROLE_TEAM } from '@/lib/types/mafia';
 import { playAgain, leaveRoom } from '@/lib/firestore/mafia';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 interface Props { room: MafiaRoom; playerId: string; }

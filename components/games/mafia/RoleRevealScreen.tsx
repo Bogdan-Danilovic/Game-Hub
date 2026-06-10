@@ -2,9 +2,9 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { MafiaRoom, ROLE_TEAM, ROLE_LABEL, ROLE_ICON, Role } from '@/lib/types/mafia';
+import { MafiaRoom, ROLE_LABEL, ROLE_ICON, Role } from '@/lib/types/mafia';
 import { advanceToPlaying } from '@/lib/firestore/mafia';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { room: MafiaRoom; playerId: string; }
 

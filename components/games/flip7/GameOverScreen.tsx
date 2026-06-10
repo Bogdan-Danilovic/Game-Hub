@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { playAgain, leaveRoom } from '@/lib/firestore/flip7';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
@@ -35,7 +35,7 @@ export function GameOverScreen({ room, playerId }: Props) {
       gameKey: `${room.code}_${room.createdAt}`,
       playerNames: room.players.map((p) => p.name),
     }).catch((e) => console.error('[stats] flip7', e));
-  }, [user]);
+  }, [user, playerId, room.code, room.createdAt, room.hostId, room.players, room.winnerId]);
 
   const isHost = room.hostId === playerId;
   const winner = room.players.find((p) => p.id === room.winnerId);

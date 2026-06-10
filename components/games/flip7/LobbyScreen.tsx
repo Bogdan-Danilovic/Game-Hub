@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { PlayerCard } from '@/components/ui/PlayerCard';
 import { updateSettings, kickPlayer, startGame, leaveRoom } from '@/lib/firestore/flip7';
 import { AdBanner } from '@/components/ads/AdBanner';

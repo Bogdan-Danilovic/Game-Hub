@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { DrawingRoom } from '@/lib/types/drawing';
 import { playAgain } from '@/lib/firestore/drawing';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 const ACCENT = '#f59e0b';

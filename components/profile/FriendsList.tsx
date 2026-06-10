@@ -28,9 +28,15 @@ export function FriendsList({ friendIds }: Props) {
   const [now, setNow] = useState(() => Date.now());
   const idsKey = friendIds.join(',');
 
-  useEffect(() => {
+  // Reset pri promeni liste prijatelja (adjust-during-render)
+  const [prevIdsKey, setPrevIdsKey] = useState(idsKey);
+  if (prevIdsKey !== idsKey) {
+    setPrevIdsKey(idsKey);
     setLoading(true);
     setError(null);
+  }
+
+  useEffect(() => {
     const unsub = subscribeFriendProfiles(
       friendIds,
       (data) => {

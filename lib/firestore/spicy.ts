@@ -3,7 +3,7 @@
 import { getDoc, setDoc, runTransaction } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { SpicyRoom, SpicyFirestorePlayer } from '@/lib/games/spicy/firestoreTypes';
-import { SpicyCard, SpicyClaim } from '@/lib/games/spicy/types';
+import { SpicyClaim } from '@/lib/games/spicy/types';
 import { createAndDeal } from '@/lib/games/spicy/cardFactory';
 import { resolveChallenge } from '@/lib/games/spicy/challengeResolver';
 import { generateRoomCode, generatePlayerId } from '@/lib/utils';
@@ -278,7 +278,7 @@ export async function voteNoChallenge(code: string, playerId: string): Promise<v
   });
 }
 
-export async function confirmChallengeResult(code: string, playerId: string): Promise<void> {
+export async function confirmChallengeResult(code: string): Promise<void> {
   const ref = roomRef(code);
   await runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);

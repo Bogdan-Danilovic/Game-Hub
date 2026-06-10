@@ -19,15 +19,22 @@ const ACCENT = '#0891b2';
 const ACCENT2 = '#06b6d4';
 const DURATION_OPTIONS: Array<30 | 60 | 90> = [30, 60, 90];
 
+const SCRAMBLE_CHARS = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
+const scrambleCode = (code: string) =>
+  code.split('').map(() => SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]);
+
 function DecryptCode({ code }: { code: string }) {
   const [revealed, setRevealed] = useState(0);
-  const chars = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
+  const [scramble, setScramble] = useState(() => scrambleCode(code));
 
   useEffect(() => {
     if (revealed >= code.length) return;
-    const t = setTimeout(() => setRevealed((r) => r + 1), 120);
+    const t = setTimeout(() => {
+      setRevealed((r) => r + 1);
+      setScramble(scrambleCode(code));
+    }, 120);
     return () => clearTimeout(t);
-  }, [revealed, code.length]);
+  }, [revealed, code]);
 
   return (
     <span className="inline-flex tracking-[0.4em]">
@@ -38,7 +45,7 @@ function DecryptCode({ code }: { code: string }) {
           animate={{ opacity: 1 }}
           className={i < revealed ? 'text-cyan-400' : 'text-slate-600'}
         >
-          {i < revealed ? char : chars[Math.floor(Math.random() * chars.length)]}
+          {i < revealed ? char : scramble[i]}
         </motion.span>
       ))}
     </span>

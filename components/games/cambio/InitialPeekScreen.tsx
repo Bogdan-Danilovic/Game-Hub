@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CambioRoom } from '@/lib/types/cambio';
 import { CardComponent } from './CardComponent';
@@ -20,9 +20,12 @@ export function InitialPeekScreen({ room, playerId }: { room: CambioRoom; player
   const [peeking, setPeeking] = useState<number[]>([]);
   const [confirmed, setConfirmed] = useState(false);
 
-  useEffect(() => {
-    if (alreadyReady) { setConfirmed(true); setPeeking([2, 3]); }
-  }, [alreadyReady]);
+  // Rejoin slucaj: igrac je vec potvrdio peek na serveru (adjust-during-render).
+  // Uslov !confirmed cuva lokalno izabrane karte od prepisivanja default vrednoscu.
+  if (alreadyReady && !confirmed) {
+    setConfirmed(true);
+    setPeeking([2, 3]);
+  }
 
   function toggleSelect(idx: number) {
     if (confirmed) return;

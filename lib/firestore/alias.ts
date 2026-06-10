@@ -6,14 +6,13 @@ import {
   updateDoc,
   runTransaction,
   serverTimestamp,
-  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { AliasRoom, AliasPlayer, AliasSettings } from '@/lib/types/alias';
 import { generateRoomCode, generatePlayerId, shuffleArray } from '@/lib/utils';
 import { getRandomWords } from '@/lib/prompts/alias';
 
-import { roomRef, subscribeToRoom } from './core';
+import { roomRef } from './core';
 
 function newRoom(code: string, hostId: string, player: AliasPlayer): AliasRoom {
   return {

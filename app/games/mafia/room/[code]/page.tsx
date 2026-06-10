@@ -17,10 +17,17 @@ function useMafiaRoom(code: string) {
   const [room, setRoom] = useState<MafiaRoom | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevCode, setPrevCode] = useState(code);
 
-  useEffect(() => {
+  // Reset stanja pri prelasku u drugu sobu (adjust-during-render)
+  if (prevCode !== code) {
+    setPrevCode(code);
+    setRoom(null);
     setLoading(true);
     setError(null);
+  }
+
+  useEffect(() => {
     const unsubscribe = subscribeToRoom<MafiaRoom>(
       code,
       (data) => { setRoom(data); setLoading(false); },

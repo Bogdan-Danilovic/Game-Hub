@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { AvalonRoom, AvalonPlayer } from '@/lib/types/avalon';
 import { advanceFromRoleReveal } from '@/lib/firestore/avalon';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props {
   room: AvalonRoom;

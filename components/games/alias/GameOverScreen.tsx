@@ -8,7 +8,7 @@ import { playAgain, leaveRoom } from '@/lib/firestore/alias';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
 import { hexA } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props {
   room: AliasRoom;
@@ -34,6 +34,8 @@ function Confetti() {
       duration: 2 + Math.random() * 2,
       color: [ACCENT_A, ACCENT_A2, ACCENT_B, '#8b5cf6', '#10b981'][Math.floor(Math.random() * 5)],
       size: 4 + Math.random() * 6,
+      rotate: 360 + Math.random() * 360,
+      borderRadius: Math.random() > 0.5 ? '50%' : '2px',
     }))
   );
 
@@ -43,9 +45,9 @@ function Confetti() {
         <motion.div
           key={p.id}
           initial={{ y: -20, x: `${p.x}vw`, opacity: 1, rotate: 0 }}
-          animate={{ y: '110vh', opacity: 0, rotate: 360 + Math.random() * 360 }}
+          animate={{ y: '110vh', opacity: 0, rotate: p.rotate }}
           transition={{ delay: p.delay, duration: p.duration, ease: 'linear', repeat: Infinity }}
-          style={{ position: 'absolute', width: p.size, height: p.size, backgroundColor: p.color, borderRadius: Math.random() > 0.5 ? '50%' : '2px' }}
+          style={{ position: 'absolute', width: p.size, height: p.size, backgroundColor: p.color, borderRadius: p.borderRadius }}
         />
       ))}
     </div>
@@ -79,10 +81,9 @@ export function GameOverScreen({ room, playerId }: Props) {
       gameKey: `${room.code}_${room.createdAt}`,
       playerNames: room.players.map((p) => p.name),
     }).catch((e) => console.error('[stats] alias', e));
-  }, [user, winner, isWinner]);
+  }, [user, winner, isWinner, playerId, room.code, room.createdAt, room.hostId, room.players]);
 
   const winnerAccent = winner === 'a' ? ACCENT_A : winner === 'b' ? ACCENT_B : null;
-  const winnerAccent2 = winner === 'a' ? ACCENT_A2 : winner === 'b' ? ACCENT_B : null;
   const winnerLabel = winner === 'a' ? 'Tim A pobjeđuje!' : winner === 'b' ? 'Tim B pobjeđuje!' : null;
 
   async function handleLeave() {

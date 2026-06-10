@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AliasRoom } from '@/lib/types/alias';
 import { scoreWord, skipWord, endRound } from '@/lib/firestore/alias';
-import { hexA } from '@/lib/utils';
 
 interface Props {
   room: AliasRoom;

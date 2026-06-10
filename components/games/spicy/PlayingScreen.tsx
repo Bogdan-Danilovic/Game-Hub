@@ -7,7 +7,7 @@ import { SpicyAction } from '@/lib/games/spicy/gameEngine';
 import { SpicyCardComponent } from '@/components/games/spicy/SpicyCard';
 import { SpiceChip } from '@/components/games/spicy/SpiceChip';
 import { ClaimModal } from '@/components/games/spicy/ClaimModal';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { state: SpicyGameState; dispatch: (a: SpicyAction) => void; }
 

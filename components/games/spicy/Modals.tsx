@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { SpicyChallengeResult, SpicyPlayer, SpicyClaim } from '@/lib/games/spicy/types';
 import { SpicyCardComponent } from '@/components/games/spicy/SpicyCard';
 import { SpiceChip, SPICE_CFG } from '@/components/games/spicy/SpiceChip';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 // ─── ChallengeModal ───────────────────────────────────────────────────────────
 interface ChallengeProps {

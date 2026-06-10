@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImpostorRoom, Category, GameMode } from '@/lib/types/impostor';
 import { CATEGORIES } from '@/lib/prompts/index';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { LobbyPlayerList } from '@/components/shared/LobbyPlayerList';
 import { CountdownTimer } from '@/components/shared/CountdownTimer';
 import { updateRoomSettings, kickPlayer, startGame } from '@/lib/firestore/impostor';
@@ -20,20 +20,27 @@ const ACCENT2 = '#ef4444';
 const CATEGORY_KEYS = Object.keys(CATEGORIES) as Category[];
 const MODE_LABELS: Record<GameMode, string> = { sentences: 'Rečenice', concepts: 'Pojmovi' };
 
+const SCRAMBLE_CHARS = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
+const scrambleCode = (code: string) =>
+  code.split('').map(() => SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]);
+
 function DecryptCode({ code }: { code: string }) {
   const [revealed, setRevealed] = useState(0);
-  const chars = 'ABCDEFGHKLMNPQRSTUVWXYZ23456789';
+  const [scramble, setScramble] = useState(() => scrambleCode(code));
   useEffect(() => {
     if (revealed >= code.length) return;
-    const t = setTimeout(() => setRevealed(r => r + 1), 120);
+    const t = setTimeout(() => {
+      setRevealed(r => r + 1);
+      setScramble(scrambleCode(code));
+    }, 120);
     return () => clearTimeout(t);
-  }, [revealed, code.length]);
+  }, [revealed, code]);
   return (
     <span className="inline-flex tracking-[0.4em]">
       {code.split('').map((char, i) => (
         <motion.span key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className={i < revealed ? 'text-red-400' : 'text-slate-600'}>
-          {i < revealed ? char : chars[Math.floor(Math.random() * chars.length)]}
+          {i < revealed ? char : scramble[i]}
         </motion.span>
       ))}
     </span>

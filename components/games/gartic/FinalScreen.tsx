@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { GarticRoom } from '@/lib/types/gartic';
 import { playAgain } from '@/lib/firestore/gartic';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 const ACCENT = '#ec4899';

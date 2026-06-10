@@ -48,12 +48,18 @@ export function FriendSearch() {
     }
   }, []);
 
-  useEffect(() => {
+  // Ocisti rezultat cim upit postane prekratak (adjust-during-render)
+  const [prevSearch, setPrevSearch] = useState(search);
+  if (prevSearch !== search) {
+    setPrevSearch(search);
     if (search.length < 3) {
       setFound(null);
       setError(null);
-      return;
     }
+  }
+
+  useEffect(() => {
+    if (search.length < 3) return;
     const id = setTimeout(() => void doSearch(search), 300);
     return () => clearTimeout(id);
   }, [search, doSearch]);

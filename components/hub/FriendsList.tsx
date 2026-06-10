@@ -26,11 +26,15 @@ export function FriendsList() {
   const [now, setNow] = useState(() => Date.now());
   const [pending, setPending] = useState<FriendRequest[]>([]);
 
+  // Ocisti redove kad se lista prijatelja promeni (adjust-during-render)
+  const [prevFriendsKey, setPrevFriendsKey] = useState(friendsKey);
+  if (prevFriendsKey !== friendsKey) {
+    setPrevFriendsKey(friendsKey);
+    setRows([]);
+  }
+
   useEffect(() => {
-    if (friends.length === 0) {
-      setRows([]);
-      return;
-    }
+    if (friends.length === 0) return;
     return subscribeFriendProfiles(friends, setRows, () => setRows([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [friendsKey]);

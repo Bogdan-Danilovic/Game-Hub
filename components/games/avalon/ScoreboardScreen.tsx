@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AvalonRoom, getMissionTeamSize, getSabotagesRequired } from '@/lib/types/avalon';
 import { advanceFromScoreboard } from '@/lib/firestore/avalon';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { LadyOfTheLakeToken } from './LadyOfTheLakeToken';
 import { LadyOfTheLakeModal } from './LadyOfTheLakeModal';
 import { LadyOfTheLakeLog } from './LadyOfTheLakeLog';

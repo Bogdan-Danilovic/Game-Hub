@@ -11,10 +11,13 @@ interface Props {
 
 export function CountdownTimer({ seconds, onEnd, accentColor = '#a78bfa' }: Props) {
   const [remaining, setRemaining] = useState(seconds);
+  const [prevSeconds, setPrevSeconds] = useState(seconds);
 
-  useEffect(() => {
+  // Restart countdown when the target changes (adjust-during-render)
+  if (prevSeconds !== seconds) {
+    setPrevSeconds(seconds);
     setRemaining(seconds);
-  }, [seconds]);
+  }
 
   useEffect(() => {
     if (remaining <= 0) {
