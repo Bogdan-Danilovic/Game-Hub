@@ -365,3 +365,30 @@ Estimated: 30 min.
 | %USERPROFILE% in git | git tree root | — |
 | Empty junk files | repo root | `0)`, `p.id`, `remove`, `{` |
 | Avalon graceful-end threshold | `lib/firestore/avalon.ts` | 621, 659 |
+
+---
+
+## Remediation Status (2026-06-10)
+
+Sve stavke iz Prioritized Fix List obrađene su na branchu `claude/game-hub-complete-audit-ndfcsn` (PR #2):
+
+| # | Fix | Status |
+|---|---|---|
+| 1 | `%USERPROFILE%` uklonjen iz git tree-a + `.gitignore` | ✅ |
+| 2 | `useLadyOfTheLake` → `applyLadyOfTheLake` | ✅ |
+| 3 | `Math.random()` u renderu (svi DecryptCode + Confetti + Particles) | ✅ |
+| 4 | setState u efektu — `useRoom`, `VotingScreen` + ~18 novih mesta nastalih posle audita | ✅ |
+| 5 | `components/screens/` obrisan | ✅ |
+| 6 | ui/shared duplikati konsolidovani — **smer obrnut u odnosu na audit**: `shared/` je u međuvremenu postao kanonski namespace (koristi ga `add-game.ts`, layout i sve nove igre), pa su obrisani duplikati iz `ui/` (Button, Input, ScreenTransition); `ui/` zadržan za shadcn fajlove (PlayerCard, accordion, login-1) | ✅ |
+| 7 | `lib/firestore.ts` i `lib/types.ts` shimovi obrisani | ✅ |
+| 8 | Zero-byte junk fajlovi uklonjeni (12 kom — lista je narasla od audita) | ✅ |
+| 9 | Neiskorišćeni importi uklonjeni (~30 fajlova, uključujući igre dodate posle audita) | ✅ |
+| 10 | Avalon prag `< 5` dokumentovan komentarom | ✅ |
+| 11 | Test framework | ❌ nije rađeno (16h stavka — preporuka: Vitest + RTL u zasebnom PR-u) |
+| 12 | `.gitignore` dopune | ✅ |
+| 13 | `test` script | ❌ zavisi od #11 |
+| 14 | GAME_STANDARD.md / CLAUDE.md verzija Next.js 14 → 16 | ✅ |
+
+Dodatno (van originalne liste): `.claude/` untrack-ovan (bio u .gitignore ali trackovan), obrisan mrtvi `components/portfolio-gallery.tsx`, popravljen conditional-hooks bug u cambio `SpecialPowerModal` (pravi runtime rizik), InitialPeekScreen rejoin više ne prepisuje izabrane karte.
+
+**Verifikacija:** `tsc --noEmit` ✅ 0 grešaka · `eslint` ✅ 0 errors / 0 warnings · `next build` ✅ (Next.js 16.2.6, 29 ruta)
