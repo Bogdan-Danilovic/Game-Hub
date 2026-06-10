@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { UnoRoom } from '@/lib/types/uno';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { nextRound } from '@/lib/firestore/uno';
 import { hexA } from '@/lib/utils';
 

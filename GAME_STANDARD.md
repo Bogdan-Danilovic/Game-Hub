@@ -3,7 +3,7 @@ Game Hub je platforma za društvene igre inspirisana Jackbox Games —
 sve igre dijele isti vizuelni identitet ali svaka ima jedinstvenu mehaniku.
 
 PLATFORMA: game-hub-wine-delta.vercel.app
-STACK: Next.js 14, TypeScript strict, Firebase Firestore, 
+STACK: Next.js 16, TypeScript strict, Firebase Firestore, 
        Tailwind, Framer Motion, Space Grotesk
 REPO: github.com/Bogdan-Danilovic/Game-Hub (hub)
 REFERENCA: github.com/Bogdan-Danilovic/Impostor-Web (primjer dobre igre)

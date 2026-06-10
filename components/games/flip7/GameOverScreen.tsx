@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { playAgain, leaveRoom } from '@/lib/firestore/flip7';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';

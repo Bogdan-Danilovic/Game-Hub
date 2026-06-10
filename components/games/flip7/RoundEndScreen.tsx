@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { nextRound } from '@/lib/firestore/flip7';
 import { hexA } from '@/lib/utils';
 

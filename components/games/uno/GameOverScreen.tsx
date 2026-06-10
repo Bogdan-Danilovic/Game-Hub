@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { UnoRoom } from '@/lib/types/uno';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { playAgain } from '@/lib/firestore/uno';
 import { hexA } from '@/lib/utils';
 

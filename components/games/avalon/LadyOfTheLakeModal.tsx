@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AvalonRoom, Loyalty } from '@/lib/types/avalon';
-import { useLadyOfTheLake } from '@/lib/firestore/avalon';
-import { Button } from '@/components/ui/Button';
+import { applyLadyOfTheLake } from '@/lib/firestore/avalon';
+import { Button } from '@/components/shared/Button';
 
 interface Props {
   room: AvalonRoom;
@@ -42,7 +42,7 @@ export function LadyOfTheLakeModal({ room, holderId, onClose }: Props) {
   async function declare(alignment: Loyalty) {
     if (!targetId || submitting) return;
     setSubmitting(true);
-    await useLadyOfTheLake(room.code, holderId, targetId, alignment);
+    await applyLadyOfTheLake(room.code, holderId, targetId, alignment);
     setStep(4);
   }
 

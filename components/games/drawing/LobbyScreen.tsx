@@ -4,7 +4,7 @@ import { useEffect, useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DrawingRoom } from '@/lib/types/drawing';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { PlayerCard } from '@/components/ui/PlayerCard';
 import { startGame, leaveRoom } from '@/lib/firestore/drawing';
 import { hexA } from '@/lib/utils';

@@ -5,7 +5,6 @@ import {
   setDoc,
   updateDoc,
   runTransaction,
-  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { ImpostorRoom, ImpostorPlayer, GameMode, Category, ImpostorSettings } from '@/lib/types/impostor';

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GarticRoom } from '@/lib/types/gartic';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { PlayerCard } from '@/components/ui/PlayerCard';
 import { startGame, leaveRoom } from '@/lib/firestore/gartic';
 import { hexA } from '@/lib/utils';

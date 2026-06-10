@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { AvalonRoom, getMissionTeamSize } from '@/lib/types/avalon';
 import { proposeTeam } from '@/lib/firestore/avalon';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 interface Props {

@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MafiaRoom, ROLE_TABLE, Role, ROLE_LABEL, ROLE_ICON, getRolesForCount } from '@/lib/types/mafia';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { LobbyPlayerList } from '@/components/shared/LobbyPlayerList';
 import { CountdownTimer } from '@/components/shared/CountdownTimer';
 import { startGame, leaveRoom, updateCustomRoles } from '@/lib/firestore/mafia';

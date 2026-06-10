@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MafiaRoom, ROLE_LABEL, ROLE_ICON, ROLE_TEAM } from '@/lib/types/mafia';
 import { killPlayer, finishGame } from '@/lib/firestore/mafia';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { room: MafiaRoom; playerId: string; }
 

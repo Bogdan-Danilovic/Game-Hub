@@ -7,7 +7,7 @@ import { ImpostorRoom } from '@/lib/types/impostor';
 import { playAgain, leaveRoom } from '@/lib/firestore/impostor';
 import { useAuth } from '@/hooks/useAuth';
 import { recordGameResult } from '@/lib/firestore/players';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 interface Props {

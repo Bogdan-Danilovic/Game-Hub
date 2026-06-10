@@ -10,7 +10,7 @@ import { buildScoreboard } from '@/lib/games/spicy/scoring';
 import { playCard, passTurn, challengePlay, voteNoChallenge, confirmChallengeResult, collectTrophy } from '@/lib/firestore/spicy';
 import { SpicyCardComponent } from '@/components/games/spicy/SpicyCard';
 import { SpiceChip, SPICE_CFG } from '@/components/games/spicy/SpiceChip';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { X, CheckCircle, Home, RotateCcw } from 'lucide-react';
 
 const SPICES: Spice[] = ['chili', 'wasabi', 'pepper'];

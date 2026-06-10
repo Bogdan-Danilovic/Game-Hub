@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flip7Room } from '@/lib/types/flip7';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { Flip7PlayerPanel } from '@/components/games/flip7/Flip7PlayerPanel';
 import { AdBanner } from '@/components/ads/AdBanner';
 import { hexA } from '@/lib/utils';

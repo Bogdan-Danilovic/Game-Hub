@@ -2,7 +2,7 @@
 
 ## Projekat
 Game Hub je platforma za društvene igre (Jackbox-style).
-Stack: Next.js 14, TypeScript strict, Firebase Firestore, Tailwind, Framer Motion
+Stack: Next.js 16, TypeScript strict, Firebase Firestore, Tailwind, Framer Motion
 Deploy: Vercel — game-hub-wine-delta.vercel.app
 Repo: github.com/Bogdan-Danilovic/Game-Hub
 

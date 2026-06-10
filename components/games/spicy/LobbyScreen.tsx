@@ -5,7 +5,7 @@ import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { SpicyRoom } from '@/lib/games/spicy/firestoreTypes';
 import { startGame } from '@/lib/firestore/spicy';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 interface Props { room: SpicyRoom; playerId: string; }
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AvalonRoom, QuestVote } from '@/lib/types/avalon';
 import { castQuestVote, resolveQuest } from '@/lib/firestore/avalon';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 import { hexA } from '@/lib/utils';
 
 interface Props {

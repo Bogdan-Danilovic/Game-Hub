@@ -7,7 +7,7 @@ import { SpicyCard, SpicyClaim, Spice } from '@/lib/games/spicy/types';
 import { isValidClaim } from '@/lib/games/spicy/claimValidator';
 import { SpicyCardComponent } from '@/components/games/spicy/SpicyCard';
 import { SPICE_CFG } from '@/components/games/spicy/SpiceChip';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/shared/Button';
 
 const SPICES: Spice[] = ['chili', 'wasabi', 'pepper'];
 const VALUES = Array.from({ length: 10 }, (_, i) => i + 1);

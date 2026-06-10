@@ -6,7 +6,6 @@ import {
   updateDoc,
   runTransaction,
   serverTimestamp,
-  Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { AliasRoom, AliasPlayer, AliasSettings } from '@/lib/types/alias';
